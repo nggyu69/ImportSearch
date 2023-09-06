@@ -3,7 +3,7 @@ from elasticsearch import Elasticsearch
 import numpy as np
 import sqlite3
 import time
-import multiprocessing
+import threading
 
 es = Elasticsearch("http://localhost:9200")
 conn = sqlite3.connect("Data/Data.sqlite3")
@@ -158,7 +158,8 @@ converters={"BE_NO":check_num,
             "STANDARD_QUANTITY":check_num}
 
 def run_query(query):
-    pd.read_sql(query, conn)
+    conn = sqlite3.connect("Data/Data.sqlite3")
+    print(pd.read_sql(query, conn))
 # t = 1
 # start_time = time.time()
 # for chunk in pd.read_csv("Data/2023_Data.csv",dtype=dtypes,converters=converters, chunksize=50000):
@@ -188,7 +189,7 @@ def run_query(query):
 # df.to_sql("Data_2023_May", conn, if_exists="replace", index=False)
 
 # start_time = time.time()
-# print(pd.read_sql(r"SELECT count(*) FROM Data_2023 where PRODUCT_DESCRIPTION like '%sheet%'", conn))
+# print(pd.read_sql(r"SELECT count(*) FROM Data_2023 where BEDATE between '2023-03-01' and '2023-04-31'", conn))
 # print("Time taken: ", time.time() - start_time)
 
 # start_time = time.time()
@@ -200,23 +201,23 @@ def run_query(query):
 
 # print("Time taken: ", time.time() - start_time)
 
-p1 = multiprocessing.Process(target=run_query, args=(r"SELECT count(*) FROM Data_2023_Jan where PRODUCT_DESCRIPTION like '%sheet%'",))
-p2 = multiprocessing.Process(target=run_query, args=(r"SELECT count(*) FROM Data_2023_Feb where PRODUCT_DESCRIPTION like '%sheet%'",))
-p3 = multiprocessing.Process(target=run_query, args=(r"SELECT count(*) FROM Data_2023_Mar where PRODUCT_DESCRIPTION like '%sheet%'",))
-p4 = multiprocessing.Process(target=run_query, args=(r"SELECT count(*) FROM Data_2023_Apr where PRODUCT_DESCRIPTION like '%sheet%'",))
-p5 = multiprocessing.Process(target=run_query, args=(r"SELECT count(*) FROM Data_2023_May where PRODUCT_DESCRIPTION like '%sheet%'",))
+# p1 = threading.Thread(target=run_query, args=(r"SELECT * FROM Data_2023_Jan",))
+# p2 = threading.Thread(target=run_query, args=(r"SELECT * FROM Data_2023_Feb",))
+# p4 = threading.Thread(target=run_query, args=(r"SELECT * FROM Data_2023_Apr",))
+# p3 = threading.Thread(target=run_query, args=(r"SELECT * FROM Data_2023_Mar",))
+# p5 = threading.Thread(target=run_query, args=(r"SELECT * FROM Data_2023_May",))
 
-start_time = time.time()
-p1.start()
-p2.start()
-p3.start()
-p4.start()
-p5.start()
 
-p1.join()
-p2.join()
-p3.join()
-p4.join()
-p5.join()
+# p1.start()
+# p2.start()
+# p3.start()
+# p4.start()
+# p5.start()
+# start_time = time.time()
+# p1.join()
+# p2.join()
+# p3.join()
+# p4.join()
+# p5.join()
 
-print("Time taken: ", time.time() - start_time)
+# print("Time taken: ", time.time() - start_time)
