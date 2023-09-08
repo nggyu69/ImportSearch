@@ -4,6 +4,7 @@ import numpy as np
 import sqlite3
 import time
 import threading
+import os
 
 es = Elasticsearch("http://localhost:9200")
 conn = sqlite3.connect("Data/Data.sqlite3")
