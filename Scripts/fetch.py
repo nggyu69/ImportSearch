@@ -1,3 +1,5 @@
+##To use only when on IFB network to access the server database
+
 import pyodbc
 import pandas as pd
 from sqlalchemy.engine import URL
@@ -18,83 +20,83 @@ start_time = time.time()
 
 with engine.begin() as conn:
     t = 1
-    for chunk_dataframe in pd.read_sql_query("select * from importdata_A where BEDATE between '2020-01-01' and '2020-01-31'", conn, chunksize = 50000):
-        chunk_dataframe.to_csv('2020/2020_Jan_Data.csv', mode = 'a', index = False)
-        print("Time to execute 2020 Jan " + str(t) +" : ", time.time() - start_time)
+    for chunk_dataframe in pd.read_sql_query("select * from importdata_A where BEDATE between '2022-01-01' and '2022-01-31'", conn, chunksize = 50000):
+        chunk_dataframe.to_csv('2022/2022_Jan_Data.csv', mode = 'a', index = False)
+        print("Time to execute 2022 Jan " + str(t) +" : ", time.time() - start_time)
         t+=1
         start_time = time.time()
         
     t = 1
-    for chunk_dataframe in pd.read_sql_query("select * from importdata_A where BEDATE between '2020-02-01' and '2020-02-28'", conn, chunksize = 50000):
-        chunk_dataframe.to_csv('2020/2020_Feb_Data.csv', mode = 'a', index = False)
-        print("Time to execute 2020 Feb " + str(t) +" : ", time.time() - start_time)
+    for chunk_dataframe in pd.read_sql_query("select * from importdata_A where BEDATE between '2022-02-01' and '2022-02-28'", conn, chunksize = 50000):
+        chunk_dataframe.to_csv('2022/2022_Feb_Data.csv', mode = 'a', index = False)
+        print("Time to execute 2022 Feb " + str(t) +" : ", time.time() - start_time)
         t+=1
         start_time = time.time()
 
     t = 1
-    for chunk_dataframe in pd.read_sql_query("select * from importdata_A where BEDATE between '2020-03-01' and '2020-03-31'", conn, chunksize = 50000):
-        chunk_dataframe.to_csv('2020/2020_Mar_Data.csv', mode = 'a', index = False)
-        print("Time to execute 2020 Mar " + str(t) +" : ", time.time() - start_time)
+    for chunk_dataframe in pd.read_sql_query("select * from importdata_A where BEDATE between '2022-03-01' and '2022-03-31'", conn, chunksize = 50000):
+        chunk_dataframe.to_csv('2022/2022_Mar_Data.csv', mode = 'a', index = False)
+        print("Time to execute 2022 Mar " + str(t) +" : ", time.time() - start_time)
         t+=1
         start_time = time.time()
 
     t = 1
-    for chunk_dataframe in pd.read_sql_query("select * from importdata_A where BEDATE between '2020-04-01' and '2020-04-30'", conn, chunksize = 50000):
-        chunk_dataframe.to_csv('2020/2020_Apr_Data.csv', mode = 'a', index = False)
-        print("Time to execute 2020 Apr " + str(t) +" : ", time.time() - start_time)
+    for chunk_dataframe in pd.read_sql_query("select * from importdata_A where BEDATE between '2022-04-01' and '2022-04-30'", conn, chunksize = 50000):
+        chunk_dataframe.to_csv('2022/2022_Apr_Data.csv', mode = 'a', index = False)
+        print("Time to execute 2022 Apr " + str(t) +" : ", time.time() - start_time)
         t+=1
         start_time = time.time()
         
     t = 1
-    for chunk_dataframe in pd.read_sql_query("select * from importdata_A where BEDATE between '2020-05-01' and '2020-05-31'", conn, chunksize = 50000):
-        chunk_dataframe.to_csv('2020/2020_May_Data.csv', mode = 'a', index = False)
-        print("Time to execute 2020 May " + str(t) +" : ", time.time() - start_time)
+    for chunk_dataframe in pd.read_sql_query("select * from importdata_A where BEDATE between '2022-05-01' and '2022-05-31'", conn, chunksize = 50000):
+        chunk_dataframe.to_csv('2022/2022_May_Data.csv', mode = 'a', index = False)
+        print("Time to execute 2022 May " + str(t) +" : ", time.time() - start_time)
         t+=1
         start_time = time.time()
         
     t = 1
-    for chunk_dataframe in pd.read_sql_query("select * from importdata_A where BEDATE between '2020-06-01' and '2020-06-30'", conn, chunksize = 50000):
-        chunk_dataframe.to_csv('2020/2020_Jun_Data.csv', mode = 'a', index = False)
-        print("Time to execute 2020 Jun " + str(t) +" : ", time.time() - start_time)
+    for chunk_dataframe in pd.read_sql_query("select * from importdata_A where BEDATE between '2022-06-01' and '2022-06-30'", conn, chunksize = 50000):
+        chunk_dataframe.to_csv('2022/2022_Jun_Data.csv', mode = 'a', index = False)
+        print("Time to execute 2022 Jun " + str(t) +" : ", time.time() - start_time)
         t+=1
         start_time = time.time()
         
     t = 1
-    for chunk_dataframe in pd.read_sql_query("select * from importdata_A where BEDATE between '2020-07-01' and '2020-07-31'", conn, chunksize = 50000):
-        chunk_dataframe.to_csv('2020/2020_Jul_Data.csv', mode = 'a', index = False)
-        print("Time to execute 2020 Jul " + str(t) +" : ", time.time() - start_time)
+    for chunk_dataframe in pd.read_sql_query("select * from importdata_A where BEDATE between '2022-07-01' and '2022-07-31'", conn, chunksize = 50000):
+        chunk_dataframe.to_csv('2022/2022_Jul_Data.csv', mode = 'a', index = False)
+        print("Time to execute 2022 Jul " + str(t) +" : ", time.time() - start_time)
         t+=1
         start_time = time.time()
     
-    for chunk_dataframe in pd.read_sql_query("select * from importdata_A where BEDATE between '2020-08-01' and '2020-08-31'", conn, chunksize = 50000):
-        chunk_dataframe.to_csv('2020/2020_Aug_Data.csv', mode = 'a', index = False)
-        print("Time to execute 2020 Aug " + str(t) +" : ", time.time() - start_time)
+    for chunk_dataframe in pd.read_sql_query("select * from importdata_A where BEDATE between '2022-08-01' and '2022-08-31'", conn, chunksize = 50000):
+        chunk_dataframe.to_csv('2022/2022_Aug_Data.csv', mode = 'a', index = False)
+        print("Time to execute 2022 Aug " + str(t) +" : ", time.time() - start_time)
         t+=1
         start_time = time.time()
     
-    for chunk_dataframe in pd.read_sql_query("select * from importdata_A where BEDATE between '2020-09-01' and '2020-09-30'", conn, chunksize = 50000):
-        chunk_dataframe.to_csv('2020/2020_Sep_Data.csv', mode = 'a', index = False)
-        print("Time to execute 2020 Sep " + str(t) +" : ", time.time() - start_time)
+    for chunk_dataframe in pd.read_sql_query("select * from importdata_A where BEDATE between '2022-09-01' and '2022-09-30'", conn, chunksize = 50000):
+        chunk_dataframe.to_csv('2022/2022_Sep_Data.csv', mode = 'a', index = False)
+        print("Time to execute 2022 Sep " + str(t) +" : ", time.time() - start_time)
         t+=1
         start_time = time.time()
 
     t = 1
-    for chunk_dataframe in pd.read_sql_query("select * from importdata_A where BEDATE between '2020-10-01' and '2020-10-31'", conn, chunksize = 50000):
-        chunk_dataframe.to_csv('2020/2020_Oct_Data.csv', mode = 'a', index = False)
-        print("Time to execute 2020 Oct " + str(t) +" : ", time.time() - start_time)
+    for chunk_dataframe in pd.read_sql_query("select * from importdata_A where BEDATE between '2022-10-01' and '2022-10-31'", conn, chunksize = 50000):
+        chunk_dataframe.to_csv('2022/2022_Oct_Data.csv', mode = 'a', index = False)
+        print("Time to execute 2022 Oct " + str(t) +" : ", time.time() - start_time)
         t+=1
         start_time = time.time()
 
     t = 1
-    for chunk_dataframe in pd.read_sql_query("select * from importdata_A where BEDATE between '2020-11-01' and '2020-11-30'", conn, chunksize = 50000):
-        chunk_dataframe.to_csv('2020/2020_Nov_Data.csv', mode = 'a', index = False)
-        print("Time to execute 2020 Nov " + str(t) +" : ", time.time() - start_time)
+    for chunk_dataframe in pd.read_sql_query("select * from importdata_A where BEDATE between '2022-11-01' and '2022-11-30'", conn, chunksize = 50000):
+        chunk_dataframe.to_csv('2022/2022_Nov_Data.csv', mode = 'a', index = False)
+        print("Time to execute 2022 Nov " + str(t) +" : ", time.time() - start_time)
         t+=1
         start_time = time.time()
 
     t = 1
-    for chunk_dataframe in pd.read_sql_query("select * from importdata_A where BEDATE between '2020-12-01' and '2020-12-31'", conn, chunksize = 50000):
-        chunk_dataframe.to_csv('2020/2020_Dec_Data.csv', mode = 'a', index = False)
-        print("Time to execute 2020 Dec " + str(t) +" : ", time.time() - start_time)
+    for chunk_dataframe in pd.read_sql_query("select * from importdata_A where BEDATE between '2022-12-01' and '2022-12-31'", conn, chunksize = 50000):
+        chunk_dataframe.to_csv('2022/2022_Dec_Data.csv', mode = 'a', index = False)
+        print("Time to execute 2022 Dec " + str(t) +" : ", time.time() - start_time)
         t+=1
         start_time = time.time()
