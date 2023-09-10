@@ -195,3 +195,5 @@ converters={"BE_NO":check_num,
 # print(pd.read_sql(r"SELECT count(*) FROM Data_2023 where BEDATE between '2023-03-01' and '2023-04-31'", conn))
 # print("Time taken: ", time.time() - start_time)
 
+years = ["2018", "2019", "2020", "2021", "2022"]
+months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct","Nov","Dec"]
