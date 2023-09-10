@@ -24,6 +24,8 @@ def start_process(year):
     return p
 start_time = time.time()
 
+years = ["2018", "2019", "2020", "2021", "2022", "2023"]
+months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct","Nov","Dec"]
 processes = []
 for year in years:
     processes.append(start_process(year))
