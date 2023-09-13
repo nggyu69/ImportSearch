@@ -3,14 +3,13 @@ from elasticsearch import Elasticsearch
 import numpy as np
 import sqlite3
 import time
+import os
+import sys
 
 
 es = Elasticsearch("http://localhost:9200")
 conn = sqlite3.connect("Data/Data.sqlite3")
 cur = conn.cursor()
-conn_full = sqlite3.connect("Data/Data_Full.sqlite3")
-cur_full = conn_full.cursor()
-# cur_full.execute("Create index if not exists prod_index on Data_2021(PRODUCT_DESCRIPTION)")
 
 
 # dtypes = {  "BE_NO" : np.float64, 
@@ -175,25 +174,59 @@ converters={"BE_NO":check_num,
 #             print(year,":", month, ":", t, "done")
 #             t += 1
 
-# print("Time taken: ", time.time() - start_time)
-# df = pd.read_sql("SELECT * FROM Data_2023 where BEDATE between '2023-01-01' and '2023-01-31'", conn)
-# df.to_sql("Data_2023_Jan", conn, if_exists="replace", index=False)
 
-# df = pd.read_sql("SELECT * FROM Data_2023 where BEDATE between '2023-02-01' and '2023-02-31'", conn)
-# df.to_sql("Data_2023_Feb", conn, if_exists="replace", index=False)
+years = ["2018", "2019", "2020", "2021", "2022", "2023"]
 
-# df = pd.read_sql("SELECT * FROM Data_2023 where BEDATE between '2023-03-01' and '2023-03-31'", conn)
-# df.to_sql("Data_2023_Mar", conn, if_exists="replace", index=False)
+def check_new_file():
+    cur_dict = {}
+    current_years = os.listdir("Data/")
+    current_years.sort()
+    for year in current_years:
+        if len(year) == 4:
+            months = []
+            current_months = os.listdir("Data/"+year+"/")
+            current_months.sort()
+            for month in current_months:
+                if month[0:4] == year:
+                    months.append(month[5:7])      
+            cur_dict[year] = months
 
-# df = pd.read_sql("SELECT * FROM Data_2023 where BEDATE between '2023-04-01' and '2023-04-31'", conn)
-# df.to_sql("Data_2023_Apr", conn, if_exists="replace", index=False)
+    df = pd.read_sql("SELECT * FROM master", conn)
+    prev_dict = {}
+    sl_no = 0
+    for i, j in zip(df["sl_no"], df["stored_months"]):
+        try:
+            prev_dict[j[0:4]] += [j[5:7]]
+        except Exception as E:
+            prev_dict[j[0:4]] = [j[5:7]]
+        sl_no = i
+    
+    for i in prev_dict:
+        for j in prev_dict[i]:
+            cur_dict[i].remove(j)
+    print(cur_dict)
 
-# df = pd.read_sql("SELECT * FROM Data_2023 where BEDATE between '2023-05-01' and '2023-05-31'", conn)
-# df.to_sql("Data_2023_May", conn, if_exists="replace", index=False)
+    for i in cur_dict:
+        for j in cur_dict[i]:
+            print(i, j)
+            t = 1
+            for chunk in pd.read_csv("Data/"+i+"/"+i+"-"+j+".csv",dtype=dtypes,converters=converters, chunksize=50000):
+                for x in chunk.columns:
+                    if x not in dtypes and x not in converters:
+                        print("Deleting column: ", x)
+                        chunk.drop(x, axis=1, inplace=True)
+                chunk.to_sql("Data_"+i, conn, if_exists="append", index=False)
+                print(i,":", j, ":", t, "done")
+                t += 1
+            sl_no += 1
+            print(sl_no, i+"_"+j)
+            cur.execute("INSERT INTO master VALUES (?,?)", (sl_no, i+"_"+j))
+        
+        conn.commit()
+        cur.execute("create index if not exists prod_index_"+i+" on Data_"+i+" (PRODUCT_DESCRIPTION)")
+        cur.execute("create index if not exists imp_index_"+i+" on Data_"+i+" (IMPORTER_NAME)")
+        cur.execute("create index if not exists sup_index_"+i+" on Data_"+i+" (SUPPLIER_NAME)")
+        conn.commit()
 
-# start_time = time.time()
-# print(pd.read_sql(r"SELECT count(*) FROM Data_2023 where BEDATE between '2023-03-01' and '2023-04-31'", conn))
-# print("Time taken: ", time.time() - start_time)
 
-years = ["2018", "2019", "2020", "2021", "2022"]
-months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct","Nov","Dec"]
+check_new_file()
