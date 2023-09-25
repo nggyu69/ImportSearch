@@ -85,40 +85,48 @@ body{
   width: 20px;
   color: white;
 }
-
+/*
 ::-webkit-calendar-picker-indicator {
     filter: invert(1);
+} */
+
+.outer-wrapper{
+  width: 1100px;
+  margin: 20px;
+  border-radius: 5px;
+
 }
 
-.table2{
-  font-size: 20px;
-  line-height: 42px;
-  text-align: center;
-  font-family: 'Poppins',sans-serif;
-  color: white;
-  letter-spacing: 0.5px;
-  overflow-x: scroll;
+.table-wrapper{
+  max-height: 500px;
+  width: 1100px;
   overflow-y: scroll;
-  border-style: hidden;
-  /* border-collapse: separate; */
+  max-width: fit-content;
+  margin: 20px;
 }
 
 table{
-    height: 500px;
-    width: 1000px;
+  border: 1px solid black;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: max-content;
 }
 
-th, td {
-  border: 2px solid white;
-  /* background-color: #F6F6F6; */
-  /* border: hidden; */
-  border-collapse: collapse;
+th{
+  position: sticky;
+  top: 0px;
+  background-color: black;
+}
+
+th, td{
+  border: 1px solid black;
   padding: 10px;
-  /* border-radius: 3px; */
+  color: white;
+  max-width: fit-content;
 }
 
-td{
-  background-color: #3C415E, #738598, #323643, #606470, #F7F7F7;
+.even{
+  background-color: #303845;
 }
 
 form{
