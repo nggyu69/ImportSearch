@@ -8,6 +8,7 @@ polars = "*"
 pandas = "*"
 elasticsearch = "*"
 django = "*"
+xlsxwriter = "*"
 
 [dev-packages]
 

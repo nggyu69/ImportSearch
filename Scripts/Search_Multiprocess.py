@@ -7,19 +7,23 @@ import sys
 
 conn = sqlite3.connect("Data/Data.sqlite3")
 cur = conn.cursor()
-conn_full = sqlite3.connect("Data/Data_Full.sqlite3")
-cur_full = conn_full.cursor()
+
 
 count_lis = []
-def run_query(query):
-    conn_full = sqlite3.connect("Data/Data_Full.sqlite3")
-    df = pd.read_sql(query, conn_full)
+df_dict = {}
+df = pd.DataFrame()
+def run_query(query, year):
+    global df
+    conn = sqlite3.connect("Data/Data.sqlite3")
+    df1 = pd.read_sql(query, conn)
     # print(df.size)
-    count_lis.append(df.size)
+    df = pd.concat([df, df1])
+
+    df_dict[year] = df1
 
 count_list = []
 def start_process(year):
-    p = threading.Thread(target=run_query, args=(r"SELECT * FROM Data_"+year+" indexed by imp_index_"+year+" where IMPORTER_NAME like '%mahle%'",))
+    p = threading.Thread(target=run_query, args=(r"SELECT SUPPLIER_NAME FROM Data_"+year+" indexed by imp_index_"+year+" where SUPPLIER_NAME like '%hyundai%' and IMPORTER_NAME like '%mahle%'", year))
     p.start()
     return p
 start_time = time.time()
@@ -35,9 +39,11 @@ for process in processes:
     process.join()
 
 print("Time taken: ", time.time() - start_time)
-print(sum(count_lis))
 
+for year in years:
+    print(df_dict[year].size)
 
+print(df_dict)
 
 # p1 = threading.Thread(target=run_query, args=(r"SELECT * FROM Data_2021_Jan indexed by prod_index_2021_Jan where PRODUCT_DESCRIPTION like '%blower%'",))
 # p2 = threading.Thread(target=run_query, args=(r"SELECT * FROM Data_2021_Feb indexed by prod_index_2021_Feb where PRODUCT_DESCRIPTION like '%blower%'",))
