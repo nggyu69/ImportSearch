@@ -4,11 +4,11 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-polars = "*"
 pandas = "*"
 elasticsearch = "*"
 django = "*"
 xlsxwriter = "*"
+pyarrow = "*"
 
 [dev-packages]
 
