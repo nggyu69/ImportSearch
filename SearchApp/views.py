@@ -5,6 +5,8 @@ import pandas as pd
 import sqlite3
 import time
 from multiprocessing import Process, Manager
+from xlsxwriter.workbook import Workbook
+import csv
 import os
 import shutil
 
@@ -231,9 +233,9 @@ def search(request):
         print(df.shape)
         # df.to_csv("Databases/Results.csv", index=False)
         # dl.write_csv("Data/Results.csv")
-        writer = pd.ExcelWriter("Data/Results/"+result_name+"/"+f"{result_name}.xlsx", engine='xlsxwriter')
+        # writer = pd.ExcelWriter("Data/Results/"+result_name+"/"+f"{result_name}.xlsx", engine='xlsxwriter')
         df.to_csv("Data/Results/"+result_name+"/"+f"{result_name}.csv", index=False)
-        # # worksheet = writer.sheets['Sheet1']
+        # worksheet = writer.sheets['Sheet1']
 
         
         
@@ -241,31 +243,31 @@ def search(request):
         # with Workbook('Databases/Results.xlsx') as workbook:
         #     dl.write_excel(workbook=workbook)
 
-        # csvfile = "Databases/Results.csv"
-        # workbook = Workbook(csvfile[:-4] + 'converted.xlsx')
-        # worksheet = workbook.add_worksheet()
-        # with open(csvfile, 'rt', encoding='utf8') as f:
-        #     reader = csv.reader(f)
-        #     for r, row in enumerate(reader):
-        #         for c, col in enumerate(row):
-        #             worksheet.write(r, c, col)
-        # worksheet.autofit()
-        # worksheet.autofilter('A1:BP1')
-        # worksheet.freeze_panes(1, 0)
-        # workbook.close()
+        csvfile = f"Data/Results/{result_name}/{result_name}.csv"
+        workbook = Workbook(f"Data/Results/{result_name}/{result_name}.xlsx")
+        worksheet = workbook.add_worksheet()
+        with open(csvfile, 'rt', encoding='utf8') as f:
+            reader = csv.reader(f)
+            for r, row in enumerate(reader):
+                for c, col in enumerate(row):
+                    worksheet.write(r, c, col)
+        worksheet.autofit()
+        worksheet.autofilter('A1:BP1')
+        worksheet.freeze_panes(1, 0)
+        workbook.close()
 
         print("Time taken : ",time.time() - start_time)
         
         # context = {'data': dl.iter_rows, "cols": dl.columns}
         # return render(request, 'login/Results.html', context)
-        # with open("Data/Results/"+result_name+"/"+f"{result_name}.xlsx", "rb") as f:
-        #     response = HttpResponse(f.read(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        #     response['Content-Disposition'] = 'attachment; filename="Results.xlsx"'
-        #     return response
-        with open("Data/Results/"+result_name+"/"+f"{result_name}.csv", "rb") as f:
-            response = HttpResponse(f.read(), content_type='text/csv')
-            response['Content-Disposition'] = f'attachment; filename="{result_name}.csv"'
+        with open("Data/Results/"+result_name+"/"+f"{result_name}.xlsx", "rb") as f:
+            response = HttpResponse(f.read(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = f'attachment; filename="{result_name}.xlsx"'
             return response
+        # with open("Data/Results/"+result_name+"/"+f"{result_name}.csv", "rb") as f:
+        #     response = HttpResponse(f.read(), content_type='text/csv')
+        #     response['Content-Disposition'] = f'attachment; filename="{result_name}.csv"'
+        #     return response
 
     context = {"today" : "2023-12-31"}
     return render(request, 'SearchApp/Search-page.html')
