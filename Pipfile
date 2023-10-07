@@ -9,6 +9,7 @@ elasticsearch = "*"
 django = "*"
 xlsxwriter = "*"
 pyarrow = "*"
+urllib3 = "*"
 
 [dev-packages]
 
