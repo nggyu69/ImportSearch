@@ -36,6 +36,7 @@ cur_progress_dict = {"2018" : cur_progress_2018, "2019" : cur_progress_2019, "20
 
 count_lis = []
 df_dict = {}
+process_dict = {}
 def run_query(query, year, batch, conn, result_name):
     # df_dict = SharedMemoryDict(name="df_dict", size=1000000000)
     conn = sqlite3.connect(f"Data/Databases/Data.sqlite3")
@@ -53,6 +54,8 @@ def run_query(query, year, batch, conn, result_name):
     conn.commit()
     # print("Read batch", batch)
     conn.close()
+    # for i in process_dict[year]:
+    #     i.terminate()
 
 count_list = []
 def start_process(year, query, batch, conn, result_name):
@@ -63,20 +66,6 @@ start_time = time.time()
 
 years = ["2018", "2019", "2020", "2021", "2022", "2023"]
 processes = []
-# for year in years:
-#     processes.append(start_process(year))
-#     print(year, "done")
-
-# for process in processes:
-#     process.join()
-
-# print("Time taken: ", time.time() - start_time)
-
-# for year in years:
-#     print(df_dict[year].size)
-
-# print(df_dict)
-
 
 
 def create_exec(query_type, index_type, supplier, importer, product, start, end):
@@ -135,6 +124,7 @@ def create_batch(index_type, start_date, end_date, supplier, importer, product):
     conn.commit()
     for j in range(int(start_date[:4]), int(end_date[:4])+1):
         df_dict[str(j)] = None
+        process_dict[str(j)] = []
         cur_progress_dict[str(j)].execute("delete from progress")
         cur_progress_dict[str(j)].execute("insert into progress values (?, ?)", (str(j), 0))
         conn_progress_dict[str(j)].commit()
@@ -151,7 +141,6 @@ def create_batch(index_type, start_date, end_date, supplier, importer, product):
     
     for i in range(0, 3):
         if index_type[i] == "1":
-            processes = []
             for year in df_dict.keys():
 
                 if(year == start_date[:4]):
@@ -171,9 +160,12 @@ def create_batch(index_type, start_date, end_date, supplier, importer, product):
                 print(year,"Batch", indices[i]+year, "done")
                 query = create_exec(index_type, indices[i], supplier, importer, product, start, end)
                 
-                start_process(year, query, indices[i]+year, year, result_name)
+                process_dict[year].append(start_process(year, query, indices[i]+year, year, result_name))
                 print(query)
                 print()
+    
+    for i in df_dict.keys():
+        print(i, process_dict[i])
     flag = True
     while(flag):
         flag = False
@@ -181,20 +173,18 @@ def create_batch(index_type, start_date, end_date, supplier, importer, product):
             if(year+".csv" in os.listdir("Data/Results/"+result_name+"/") and cur_progress_dict[year].execute("select status from progress where year = ?", (year,)).fetchone()[0] and df_dict[year] is None):
                 print("Done with", year)
                 df_dict[year] = pd.read_csv("Data/Results/"+result_name+"/"+year+".csv")
-                print(df_dict[year].shape)
+                print(df_dict[year]["PRODUCT_DESCRIPTION"])
         for year in df_dict.keys():
             if(df_dict[year] is None):
                 flag = True
                 break
-    
-
     return 
 
 start_date = "2018-01-01"
 end_date = "2023-12-31"
 supplier = "infineon" #infineon
 importer = "millennium semiconductor" #millennium semiconductor #ifb industries
-product = "" #motor
+product = "circuit" #motor
 
 
 query_type = ""

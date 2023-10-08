@@ -8,7 +8,7 @@ import sys
 
 
 es = Elasticsearch("http://localhost:9200")
-conn = sqlite3.connect("Data/Data.sqlite3")
+conn = sqlite3.connect("Data/Databases/Data.sqlite3")
 cur = conn.cursor()
 
 
