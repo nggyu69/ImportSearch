@@ -6,7 +6,7 @@ import time
 import os
 import sys
 
-
+os.chdir("..")
 es = Elasticsearch("http://localhost:9200")
 conn = sqlite3.connect("Data/Databases/Data.sqlite3")
 cur = conn.cursor()
@@ -179,12 +179,12 @@ years = ["2018", "2019", "2020", "2021", "2022", "2023"]
 
 def check_new_file():
     cur_dict = {}
-    current_years = os.listdir("Data/")
+    current_years = os.listdir("Data/Excel_Files")
     current_years.sort()
     for year in current_years:
         if len(year) == 4:
             months = []
-            current_months = os.listdir("Data/"+year+"/")
+            current_months = os.listdir("Data/Excel_Files/"+year+"/")
             current_months.sort()
             for month in current_months:
                 if month[0:4] == year:
@@ -210,7 +210,7 @@ def check_new_file():
         for j in cur_dict[i]:
             print(i, j)
             t = 1
-            for chunk in pd.read_csv("Data/"+i+"/"+i+"-"+j+".csv",dtype=dtypes,converters=converters, chunksize=50000):
+            for chunk in pd.read_csv("Data/Excel_Files/"+i+"/"+i+"-"+j+".csv",dtype=dtypes,converters=converters, chunksize=50000):
                 for x in chunk.columns:
                     if x not in dtypes and x not in converters:
                         print("Deleting column: ", x)

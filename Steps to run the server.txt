@@ -1,0 +1,5 @@
+1) Open cmd
+Type the follwing commands in cmd
+	- E: && cd ImportSearch && pipenv shell
+	- python manage.py runserver
+2) In any computer on the same network, in chrome go to http://172.19.7.137:8000/

@@ -9,7 +9,7 @@ import os
 import shutil
 
 
-
+os.chdir("..")
 conn = sqlite3.connect("Data/Databases/Data.sqlite3")
 cur = conn.cursor()
 
