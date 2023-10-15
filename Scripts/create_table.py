@@ -6,7 +6,7 @@ import time
 import os
 import sys
 
-os.chdir("..")
+# os.chdir("..")
 es = Elasticsearch("http://localhost:9200")
 conn = sqlite3.connect("Data/Databases/Data.sqlite3")
 cur = conn.cursor()
