@@ -11,6 +11,7 @@ xlsxwriter = "*"
 pyarrow = "*"
 urllib3 = "*"
 numpy = "*"
+openpyxl = "*"
 
 [dev-packages]
 

@@ -88,6 +88,7 @@ converters={"BE_NO":check_num,
 
 years = os.listdir("Data/Excel_Files")
 years.sort()
+years = years[1:]
 for year in years:
     months = os.listdir("Data/Excel_Files/"+year)
     months.sort()
@@ -125,9 +126,9 @@ for year in years:
                     worksheet.write(r, c, col)
                 count += 1
 
-                if count > 1000000:
+                if count > 250000:
                     print(count)
-                    count = 0
+                    count = 0 
                     file_count += 1
                     worksheet.autofit()
                     workbook.close()

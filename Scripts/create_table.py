@@ -7,10 +7,16 @@ import os
 import sys
 
 # os.chdir("..")
-es = Elasticsearch("http://localhost:9200")
-conn = sqlite3.connect("Data/Databases/Data.sqlite3")
-cur = conn.cursor()
 
+cols = "BE_NO, BEDATE, HS_CODE, PRODUCT_DESCRIPTION, QUANTITY, UNIT, ASSESS_VALUE_INR, UNIT_PRICE_INR, ASSESS_VALUE_USD, UNIT_PRICE_USD, TOTAL_DUTY, TOTAL_DUTY_BE_WISE, APPLICABLE_DUTY_INR, EXCHANGE_RATE_USD, ITEM_RATE_INV_CURR, VALUE_INV_CURR, INVOICE_CURRENCY, ASSESS_GROUP, IMPORTER_CODE, IMPORTER_NAME, IMPORTER_ADDRESS, IMPORTER_CITY, IMPORTER_PIN, IMPORTER_STATE, SUPPLIER_CODE, SUPPLIER_NAME, SUPPLIER_ADDRESS, SUPPLIER_COUNTRY, FOREIGN_PORT, FOREIGN_COUNTRY, FOREIGN_REGIONS, CHA_NAME, CHA_PAN, IEC, IEC_CODE, INVOICE_NUMBER, INVOICE_SR_NO, ITEM_NUMBER, HSCODE_2DIGIT, HSCODE_4DIGIT, TYPE, INDIAN_PORT, SHIPMENT_MODE, INDIAN_REGIONS, SHIPMENT_PORT, HSCODE_6DIGIT, BCD_NOTN, BCD_RATE, BCD_AMOUNT_INR, CVD_NOTN, CVD_RATE, CVD_AMOUNT_INR, IGST_AMOUNT_INR, GST_CESS_AMOUNT_INR, REMARK, INCOTERMS, TOTAL_FREIGHT_VALUE_FORGN_CUR, FREIGHT_CURRENCY, TOTAL_INSU_VALUE_FORGN_CUR, INSURANCE_CURRENCY, TOTAL_INVOICE_VALUE_INR, INSURANCE_VALUE_INR, TOTAL_GROSS_WEIGHT, TOTAL_FREIGHT_VALUE_INR, GROSS_WEIGHT_UNIT, CUSTOM_NOTIFICATION, STANDARD_QUANTITY, STANDARD_QUANTITY_UNIT"
+
+conn = sqlite3.connect("Data/Databases/Data2.sqlite3")
+cur = conn.cursor()
+cur.execute("""CREATE TABLE if not exists "master" (
+	"sl_no"	INTEGER,
+	"stored_months"	TEXT,
+	PRIMARY KEY("sl_no")
+)""")
 
 # dtypes = {  "BE_NO" : np.float64, 
 #             "BEDATE" : str, 
@@ -80,6 +86,7 @@ cur = conn.cursor()
 #             "CUSTOM_NOTIFICATION" : str,
 #             "STANDARD_QUANTITY" : np.float64,
 #             "STANDARD_QUANTITY_UNIT" : str}
+
 
 def check_num(val):
     try:
@@ -158,24 +165,37 @@ converters={"BE_NO":check_num,
             "INSURANCE_VALUE_INR":check_num,
             "TOTAL_GROSS_WEIGHT":check_num,
             "TOTAL_FREIGHT_VALUE_INR":check_num,
-            "STANDARD_QUANTITY":check_num}
+            "STANDARD_QUANTITY":check_num,
+            "TOTAL_INSU_VALUE_FORGN_CUR":check_num}
 
-# start_time = time.time()
-# # for year in years:
-#     for month in months:
-#         t = 1
-#         for chunk in pd.read_csv("Data/"+year+"/"+year+"_"+month+"_Data.csv",dtype=dtypes,converters=converters, chunksize=50000):
-#             # chunk.drop(chunk.columns[0], axis=1, inplace=True)
-#             # for j,i in enumerate(chunk.dtypes):
-#             #     print(chunk.columns[j], " : ", i)
-#             # break 
+def cols_string():
+    cols_string = ""
+    for i in cols.split(", "):
+        if i in dtypes.keys():
+            cols_string += f"{i} TEXT, "
+        else:
+            cols_string += f"{i} REAL, "
+    cols_string = cols_string[:-2]
+    return cols_string
 
-#             chunk.to_sql("Data_"+year, conn_full, if_exists="append", index=False)
-#             print(year,":", month, ":", t, "done")
-#             t += 1
-
-
-years = ["2018", "2019", "2020", "2021", "2022", "2023"]
+def create_table(year):
+    if((f"Data_{year}",) in list(cur.execute("SELECT name FROM sqlite_schema WHERE type='table' ORDER BY name").fetchall())):
+        return
+    else:
+        cur.execute(f"CREATE TABLE if not exists Data_{year} ({cols_string()})")
+        cur.execute(f"create virtual table Data_{year}_virt_searcher using fts5(PRODUCT_DESCRIPTION, IMPORTER_NAME, SUPPLIER_NAME, content = 'Data_{year}', tokenize = 'trigram')")
+        cur.execute(f"""create trigger Data_{year}_virt_searcher_insert after insert on Data_{year} 
+                        begin 
+                        insert into Data_{year}_virt_searcher(rowid, PRODUCT_DESCRIPTION, IMPORTER_NAME, SUPPLIER_NAME) values (new.rowid, new.PRODUCT_DESCRIPTION, new.IMPORTER_NAME, new.SUPPLIER_NAME); 
+                        end;""")
+        cur.execute(f"""create trigger Data_{year}_virt_searcher_delete after delete on Data_{year}
+                        begin
+                        delete from Data_{year}_virt_searcher where rowid = old.rowid;
+                        end;""")
+        cur.execute(f"""create trigger Data_{year}_virt_searcher_update after update on Data_{year}
+                        begin
+                        update Data_{year}_virt_searcher set PRODUCT_DESCRIPTION = new.PRODUCT_DESCRIPTION, IMPORTER_NAME = new.IMPORTER_NAME, SUPPLIER_NAME = new.SUPPLIER_NAME where rowid = old.rowid;
+                        end;""")
 
 def check_new_file():
     cur_dict = {}
@@ -183,6 +203,7 @@ def check_new_file():
     current_years.sort()
     for year in current_years:
         if len(year) == 4:
+            create_table(year)
             months = []
             current_months = os.listdir("Data/Excel_Files/"+year+"/")
             current_months.sort()
@@ -190,10 +211,9 @@ def check_new_file():
                 if month[0:4] == year:
                     months.append(month[5:7])      
             cur_dict[year] = months
-
     df = pd.read_sql("SELECT * FROM master", conn)
     prev_dict = {}
-    sl_no = 0
+    sl_no = 1
     for i, j in zip(df["sl_no"], df["stored_months"]):
         try:
             prev_dict[j[0:4]] += [j[5:7]]
@@ -204,29 +224,41 @@ def check_new_file():
     for i in prev_dict:
         for j in prev_dict[i]:
             cur_dict[i].remove(j)
-    print(cur_dict)
-
+    
     for i in cur_dict:
         for j in cur_dict[i]:
             print(i, j)
             t = 1
-            for chunk in pd.read_csv("Data/Excel_Files/"+i+"/"+i+"-"+j+".csv",dtype=dtypes,converters=converters, chunksize=50000):
-                for x in chunk.columns:
-                    if x not in dtypes and x not in converters:
-                        print("Deleting column: ", x)
-                        chunk.drop(x, axis=1, inplace=True)
-                chunk.to_sql("Data_"+i, conn, if_exists="append", index=False)
-                print(i,":", j, ":", t, "done")
-                t += 1
+            for k in os.listdir(f"Data/Excel_Files/{i}/{i}-{j}"):
+                if k.endswith(".xlsx"):
+                    print(f"Data/Excel_files/{i}/{i}-{j}/{k}")
+                    # writer = pd.ExcelWriter(f"Data/Excel_files/{i}/{i}-{j}/{k}")
+                    # writer.close()
+                    df = pd.read_excel(f"Data/Excel_Files/{i}/{i}-{j}/{k}", names = cols.split(", "), dtype=dtypes, converters=converters, engine="openpyxl")
+                    if(df.shape[0] < 3):
+                        continue
+                    print(df.shape)
+                    df.to_csv(f"Data/Excel_Files/{i}/{i}-{j}/{k[:-5]}.csv", index=False, header=True)
+                    # os.remove(f"Data/Excel_Files/{i}/{i}-{j}/{k}")
+                    k = k[:-5]+".csv"
+                for chunk in pd.read_csv(f"Data/Excel_Files/{i}/{i}-{j}/{k}",dtype=dtypes,converters=converters, chunksize=50000):
+                    chunk.rename(columns={"TOTAL_INSU_VALUE_ FORGN_CUR":"TOTAL_INSU_VALUE_FORGN_CUR"}, inplace=True)
+                    for x in chunk.columns:
+                        if x not in dtypes and x not in converters:
+                            print("Deleting column: ", x)
+                            chunk.drop(x, axis=1, inplace=True)
+                    chunk.to_sql("Data_"+i, conn, if_exists="append", index=False)
+                    print(i,":", j, ":", t, "done")
+                    t += 1
             sl_no += 1
             print(sl_no, i+"_"+j)
             cur.execute("INSERT INTO master VALUES (?,?)", (sl_no, i+"_"+j))
         
         conn.commit()
-        cur.execute("create index if not exists prod_index_"+i+" on Data_"+i+" (PRODUCT_DESCRIPTION)")
-        cur.execute("create index if not exists imp_index_"+i+" on Data_"+i+" (IMPORTER_NAME)")
-        cur.execute("create index if not exists sup_index_"+i+" on Data_"+i+" (SUPPLIER_NAME)")
-        conn.commit()
+        # cur.execute("create index if not exists prod_index_"+i+" on Data_"+i+" (PRODUCT_DESCRIPTION)")
+        # cur.execute("create index if not exists imp_index_"+i+" on Data_"+i+" (IMPORTER_NAME)")
+        # cur.execute("create index if not exists sup_index_"+i+" on Data_"+i+" (SUPPLIER_NAME)")
+        # conn.commit()
 
 
 check_new_file()

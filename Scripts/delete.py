@@ -1,8 +1,11 @@
 import sqlite3
 import time
 import pandas as pd
+import os
+import sys
 
-conn = sqlite3.connect('Data/Databases/Data.sqlite3')
+
+conn = sqlite3.connect('Data/Databases/Data2.sqlite3')
 cur = conn.cursor()
 
 
@@ -14,7 +17,7 @@ cols = "BE_NO, BEDATE, HS_CODE, QUANTITY, UNIT, ASSESS_VALUE_INR, UNIT_PRICE_INR
 # conn.commit()
 
 start_time = time.time()
-df = pd.read_sql("select * from Data_2019 where ROWID in (select ROWID from Data_2019_virt_searcher where PRODUCT_DESCRIPTION MATCH 'steel' and IMPORTER_NAME match 'electric')", conn)
+df = pd.read_sql("select * from Data_2021 where ROWID in (select ROWID from Data_2021_virt_searcher where PRODUCT_DESCRIPTION MATCH 'steel' and IMPORTER_NAME match 'electric')", conn)
 # print(cur.execute("select count(*) from Data_2019_virt_searcher where PRODUCT_DESCRIPTION match 'blower'").fetchall())
 # df = pd.read_sql("select * from Data_2019 indexed by prod_index_2019 where PRODUCT_DESCRIPTION like '%steel%' and IMPORTER_NAME like '%electric%'", conn)
 # print(len(cur.execute("select * from Data_2019_index where PRODUCT_DESCRIPTION like '%controller%'").fetchall()))
