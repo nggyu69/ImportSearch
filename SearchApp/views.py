@@ -29,8 +29,7 @@ def run_query(query, year, dict1):
         dict1[year] = df1
     
     conn.close()
-    for i in process_dict[year]:
-        i.terminate()
+
 
 count_list = []
 def start_process(year, query, dict1):
