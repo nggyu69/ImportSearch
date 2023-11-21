@@ -11,7 +11,8 @@ import os
 import shutil
 import warnings
 
-warnings.filterwarnings("ignore", category=DeprecationWarning) 
+warnings.filterwarnings("ignore", category=FutureWarning) 
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
 conn_main = sqlite3.connect("Data/Databases/Data.sqlite3", check_same_thread=False)
@@ -29,6 +30,7 @@ def run_query(query, year, dict1):
         dict1[year] = df1
     
     conn.close()
+    print(f"Done with {year}. Number of rows : {len(dict1[year])}")
 
 
 count_list = []
@@ -72,7 +74,7 @@ def create_batch(start_date, end_date, supplier, importer, product):
         process_dict[str(j)] = []
 
     
-        
+    start_time_query = time.time()
     for year in df_dict.keys():
         if(year == start_date[:4]):
             if(year == end_date[:4]):
@@ -94,19 +96,23 @@ def create_batch(start_date, end_date, supplier, importer, product):
         print(query)
         print()
     
-    flag = True
-    while(flag):
-        flag = False
-        for year in df_dict.keys():
-            if(dict1[year] is not None and df_dict[year] is None):
-                print("Done with", year)
-                print(len(dict1[year]))
-                df_dict[year] = dict1[year]
-        for year in df_dict.keys():
-            if(df_dict[year] is None):
-                flag = True
-                break    
+    # flag = True
+    # while(flag):
+    #     flag = False
+    #     for year in df_dict.keys():
+    #         if(dict1[year] is not None and df_dict[year] is None):
+    #             print("Done with", year)
+    #             print(len(dict1[year]))
+    #             df_dict[year] = dict1[year]
+    #     for year in df_dict.keys():
+    #         if(df_dict[year] is None):
+    #             flag = True
+    #             break    
+    for process in process_dict.values():
+        for p in process:
+            p.join()
 
+    print("Time taken to retrieve results : ", time.time() - start_time_query)
     return dict1
 
 def search(request):
