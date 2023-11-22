@@ -1,0 +1,14 @@
+{
+    "builds": [
+      {
+        "src": "ImportSearch/wsgi.py",
+        "use": "@vercel/python"
+      }
+    ],
+    "routes": [
+      {
+        "src": "/(.*)",
+        "dest": "ImportSearch/wsgi.py"
+      }
+    ]
+}
