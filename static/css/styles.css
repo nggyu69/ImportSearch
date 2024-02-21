@@ -5,16 +5,22 @@
     margin: 0;
     box-sizing: border-box;
 }
+:root {
+    --box-height: 700px;
+    --box-width: 900px;
+}
 body{
     background-color: #080710;
 }
+
 .background{
-    width: 430px;
-    height: 520px;
+    height: var(--box-height);
+    width: var(--box-width);
     position: absolute;
     transform: translate(-50%,-50%);
     left: 50%;
     top: 50%;
+    background: transparent;
 }
 .background .shape{
     height: 200px;
@@ -43,29 +49,43 @@ body{
 .shape2:first-child{
     height: 100px;
     width: 100px;
-    left: -280px;
-    top: -130px;
+    left: -50px;
+    top: -50px;
 }
 .shape2:last-child{
     height: 100px;
     width: 100px;
-    right: -280px;
-    bottom: -135px;
+    right: -50px;
+    bottom: -50px;
 }
 .shape3:first-child{
     height: 70px;
     width: 70px;
-    left: -465px;
-    top: -105px;
+    /* left: -465px;
+    top: -105px; */
 }
 
 .shape3:last-child{
     height: 70px;
     width: 70px;
-    right: -465px;
-    bottom: -105px;
+    /* right: -465px;
+    bottom: -105px; */
 }
 
+.transparent-box {
+    height: var(--box-height);
+    width: var(--box-width);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    background-color: rgba(255,255,255,0.13);
+    border: 2px solid rgba(255,255,255,0.1);
+    box-shadow: 0 0 40px rgba(8,7,16,0.6);
+    padding: 30px 20px;
+}
 .logout{
     text-align: right;
     font-size: 16px;
@@ -104,6 +124,7 @@ body{
   max-width: fit-content;
   margin: 20px;
 }
+
 
 table{
   border: 1px solid black;
@@ -160,9 +181,9 @@ form{
 }
 
 .form2{
-  height: 700px;
-  width: 900px;
-  padding-top: 30px;
+    height: var(--box-height);
+    width: var(--box-width);
+    padding-top: 30px;
 }
 
 form *{
@@ -177,6 +198,14 @@ form h3{
     font-weight: 500;
     line-height: 42px;
     text-align: center;
+}
+
+form h4{
+    font-size: 22px;
+    font-weight: 500;
+    line-height: 32px;
+    text-align: center;
+
 }
 
 label{
@@ -200,7 +229,8 @@ input{
     color: #e5e5e5;
 }
 button{
-    margin-top: 50px;
+    margin-top: 30px;
+    height: 60px;
     width: 100%;
     background-color: #ffffff;
     color: #080710;

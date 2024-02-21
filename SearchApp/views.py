@@ -10,6 +10,15 @@ import csv
 import os
 import shutil
 import warnings
+from datetime import datetime
+from pathlib import Path
+import sys
+import easygui
+import zipfile
+
+path_root = Path(__file__).parents[1] / "Scripts"
+sys.path.append(str(path_root))
+print(sys.path)
 
 warnings.filterwarnings("ignore", category=FutureWarning) 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -23,7 +32,7 @@ df_dict = {}
 
 process_dict = {}
 def run_query(query, year, dict1):
-    conn = sqlite3.connect(f"Data/Databases/Data2.sqlite3")
+    conn = sqlite3.connect(f"Data/Databases/Data.sqlite3")
     df1 = pd.read_sql_query(query, conn)
 
     if dict1[year] is None:
@@ -115,8 +124,40 @@ def create_batch(start_date, end_date, supplier, importer, product):
     print("Time taken to retrieve results : ", time.time() - start_time_query)
     return dict1
 
+def home(request):
+    return render(request, 'SearchApp/Home.html')
+
+def insert(request):
+    import create_table
+
+    if request.method == "POST":
+        date = request.POST.get('Month')
+        year = date[:4]
+
+        file_path = easygui.fileopenbox(filetypes=["*.zip"])
+        if file_path is None:
+            return render(request, 'SearchApp/Insert.html', {"month" : date})
+        
+        os.makedirs(f"Data/Excel_Files/{year}/{date}", exist_ok=True)
+        current_files = os.listdir(f"Data/Excel_Files/{year}/{date}")
+        current_files.sort()
+        if(len(current_files) > 0):
+            current_num = int(current_files[-1].split("_")[-1].split(".")[0])
+            current_num += 1
+        else:
+            current_num = 0
+
+        with zipfile.ZipFile(file_path, 'r') as zip_ref:
+            for i, file_info in enumerate(zip_ref.infolist()):
+                zip_ref.extract(file_info, f"Data/Excel_Files/{year}/{date}")
+                os.rename(f"Data/Excel_Files/{year}/{date}/{file_info.filename}", f"Data/Excel_Files/{year}/{date}/{date}_{current_num+i}.{file_info.filename.split('.')[-1]}")
+        
+        create_table.check_new_file()
+    
+    context = {"month" : datetime.now().strftime("%Y-%m")}
+    return render(request, 'SearchApp/Insert.html', context)
+
 def search(request):
-    print(request.session.session_key)
     start_time = time.time()
     global dl
     # print(time.time() - start_time)

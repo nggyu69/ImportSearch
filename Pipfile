@@ -12,6 +12,8 @@ pyarrow = "*"
 urllib3 = "*"
 numpy = "*"
 openpyxl = "*"
+easygui = "*"
+global-state = "*"
 
 [dev-packages]
 
