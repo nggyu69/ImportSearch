@@ -18,7 +18,6 @@ import zipfile
 
 path_root = Path(__file__).parents[1] / "Scripts"
 sys.path.append(str(path_root))
-print(sys.path)
 
 warnings.filterwarnings("ignore", category=FutureWarning) 
 warnings.filterwarnings("ignore", category=DeprecationWarning)

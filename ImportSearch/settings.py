@@ -24,14 +24,16 @@ SECRET_KEY = 'django-insecure-aeqiil@f5mskg^@6vgkfodc7w-lr_-=gv48i_yjjzs0b4d7qob
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["172.19.7.137",
+ALLOWED_HOSTS = ["172.19.7.20",
+                 "WHT-IND-08542",
+                 "safe-previously-ibex.ngrok-free.app",
                  "192.168.0.222",
                  "127.0.0.1",
                  "0.0.0.0",
                  "100.95.173.50",
                  ".vercel.app"]
 
-
+CSRF_TRUSTED_ORIGINS = ["https://safe-previously-ibex.ngrok-free.app"]
 # Application definition
 
 INSTALLED_APPS = [
