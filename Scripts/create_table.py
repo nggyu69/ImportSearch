@@ -221,16 +221,19 @@ def check_new_file():
             prev_dict[j[0:4]] = [j[5:7]]
         sl_no = i
     print(prev_dict)
-    print(cur_dict)
+    
     for i in prev_dict:
         for j in prev_dict[i]:
             cur_dict[i].remove(j)
-    
+    print(cur_dict)
     for i in cur_dict:
         for j in cur_dict[i]:
             print(i, j)
             t = 1
-            for k in os.listdir(f"Data/Excel_Files/{i}/{i}-{j}"):
+            files = os.listdir(f"Data/Excel_Files/{i}/{i}-{j}")
+            files.sort()
+            
+            for k in files:
                 if k.endswith(".xlsx"):
                     print(f"Data/Excel_files/{i}/{i}-{j}/{k}")
                     # writer = pd.ExcelWriter(f"Data/Excel_files/{i}/{i}-{j}/{k}")
