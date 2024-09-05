@@ -229,7 +229,10 @@ def check_new_file():
         for j in cur_dict[i]:
             print(i, j)
             t = 1
-            for k in os.listdir(f"Data/Excel_Files/{i}/{i}-{j}"):
+            files = os.listdir(f"Data/Excel_Files/{i}/{i}-{j}")
+            files.sort()
+            
+            for k in files:
                 if k.endswith(".xlsx"):
                     print(f"Data/Excel_files/{i}/{i}-{j}/{k}")
                     # writer = pd.ExcelWriter(f"Data/Excel_files/{i}/{i}-{j}/{k}")

@@ -12,8 +12,11 @@ server = 'MDSERVER'
 database = 'Basic' 
 username = 'sa' 
 password = 'Motordivision@123'
-conn_string = 'DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password
-cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
+connectionString = f'DRIVER={{ODBC Driver 18 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
+# conn_string = 'DRIVER={/opt/microsoft/msodbcsql17/lib64/libmsodbcsql-17.0.so.1.1};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password
+# cnxn = pyodbc.connect('DRIVER={DRIVER={ODBC Driver 18 for SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
+conn = pyodbc.connect(connectionString) 
+sys.exit()
 connection_url = URL.create("mssql+pyodbc", query={"odbc_connect": conn_string})
 engine = create_engine(connection_url)
 curx = cnxn.cursor()
