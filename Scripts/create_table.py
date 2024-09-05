@@ -221,11 +221,10 @@ def check_new_file():
             prev_dict[j[0:4]] = [j[5:7]]
         sl_no = i
     print(prev_dict)
-    print(cur_dict)
     for i in prev_dict:
         for j in prev_dict[i]:
             cur_dict[i].remove(j)
-    
+    print(cur_dict)
     for i in cur_dict:
         for j in cur_dict[i]:
             print(i, j)
