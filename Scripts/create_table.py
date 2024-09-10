@@ -168,6 +168,77 @@ converters={"BE_NO":check_num,
             "STANDARD_QUANTITY":check_num,
             "TOTAL_INSU_VALUE_FORGN_CUR":check_num}
 
+column_map = {
+    "BE_NO": ["BE_NO"],
+    "BEDATE": ["BEDATE", "DATE"],
+    "HS_CODE": ["HS_CODE", "HS CODE"],
+    "PRODUCT_DESCRIPTION": ["PRODUCT_DESCRIPTION", "PRODUCT DESCRIPTION"],
+    "QUANTITY": ["QUANTITY"],
+    "UNIT": ["UNIT"],
+    "ASSESS_VALUE_INR": ["ASSESS_VALUE_INR"],
+    "UNIT_PRICE_INR": ["UNIT_PRICE_INR"],
+    "ASSESS_VALUE_USD": ["ASSESS_VALUE_USD", "CIF VALUE (USD)"],
+    "UNIT_PRICE_USD": ["UNIT_PRICE_USD", "UNIT PRICE (USD)"],
+    "TOTAL_DUTY": ["TOTAL_DUTY", "ESTIMATED TARIFF(USD)"],
+    "TOTAL_DUTY_BE_WISE": ["TOTAL_DUTY_BE_WISE"],
+    "APPLICABLE_DUTY_INR": ["APPLICABLE_DUTY_INR"],
+    "EXCHANGE_RATE_USD": ["EXCHANGE_RATE_USD", "EXCHANGE RATE(USD)"],
+    "ITEM_RATE_INV_CURR": ["ITEM_RATE_INV_CURR", "ITEM RATE"],
+    "VALUE_INV_CURR": ["VALUE_INV_CURR"],
+    "INVOICE_CURRENCY": ["INVOICE_CURRENCY", "CURRENCY"],
+    "ASSESS_GROUP": ["ASSESS_GROUP"],
+    "IMPORTER_CODE": ["IMPORTER_CODE", "IMPORTER CODE"],
+    "IMPORTER_NAME": ["IMPORTER_NAME", "IMPORTER NAME"],
+    "IMPORTER_ADDRESS": ["IMPORTER_ADDRESS", "IMPORTER ADDRESS"],
+    "IMPORTER_CITY": ["IMPORTER_CITY", "IMPORTER CITY"],
+    "IMPORTER_PIN": ["IMPORTER_PIN", "IMPORTER PIN"],
+    "IMPORTER_STATE": ["IMPORTER_STATE", "IMPORTER STATE"],
+    "SUPPLIER_CODE": ["SUPPLIER_CODE", "SUPPLIER CODE"],
+    "SUPPLIER_NAME": ["SUPPLIER_NAME", "SUPPLIER NAME"],
+    "SUPPLIER_ADDRESS": ["SUPPLIER_ADDRESS", "SUPPLIER ADDRESS"],
+    "SUPPLIER_COUNTRY": ["SUPPLIER_COUNTRY", "SUPPLIER COUNTRY"],
+    "FOREIGN_PORT": ["FOREIGN_PORT", "FOREIGN PORT"],
+    "FOREIGN_COUNTRY": ["FOREIGN_COUNTRY", "FOREIGN COUNTRY"],
+    "FOREIGN_REGIONS": ["FOREIGN_REGIONS", "FOREIGN REGIONS"],
+    "CHA_NAME": ["CHA_NAME"],
+    "CHA_PAN": ["CHA_PAN"],
+    "IEC": ["IEC"],
+    "IEC_CODE": ["IEC_CODE"],
+    "INVOICE_NUMBER": ["INVOICE_NUMBER"],
+    "INVOICE_SR_NO": ["INVOICE_SR_NO"],
+    "ITEM_NUMBER": ["ITEM_NUMBER"],
+    "HSCODE_2DIGIT": ["HSCODE_2DIGIT", "HSCODE(2 DIGIT)"],
+    "HSCODE_4DIGIT": ["HSCODE_4DIGIT", "HSCODE(4 DIGIT)"],
+    "TYPE": ["TYPE"],
+    "INDIAN_PORT": ["INDIAN_PORT", "INDIAN PORT"],
+    "SHIPMENT_MODE": ["SHIPMENT_MODE", "SHIPMENT MODE"],
+    "INDIAN_REGIONS": ["INDIAN_REGIONS", "INDIAN REGIONS"],
+    "SHIPMENT_PORT": ["SHIPMENT_PORT", "SHIPMENT PORT"],
+    "HSCODE_6DIGIT": ["HSCODE_6DIGIT", "HSCODE(6 DIGIT)"],
+    "BCD_NOTN": ["BCD_NOTN"],
+    "BCD_RATE": ["BCD_RATE"],
+    "BCD_AMOUNT_INR": ["BCD_AMOUNT_INR", "BCD AMOUNT(INR)"],
+    "CVD_NOTN": ["CVD_NOTN"],
+    "CVD_RATE": ["CVD_RATE"],
+    "CVD_AMOUNT_INR": ["CVD_AMOUNT_INR"],
+    "IGST_AMOUNT_INR": ["IGST_AMOUNT_INR"],
+    "GST_CESS_AMOUNT_INR": ["GST_CESS_AMOUNT_INR"],
+    "REMARK": ["REMARK"],
+    "INCOTERMS": ["INCOTERMS"],
+    "TOTAL_FREIGHT_VALUE_FORGN_CUR": ["TOTAL_FREIGHT_VALUE_FORGN_CUR", "TOTAL FREIGHT VALUE(FORGN CUR)"],
+    "FREIGHT_CURRENCY": ["FREIGHT_CURRENCY"],
+    "TOTAL_INSU_VALUE_FORGN_CUR": ["TOTAL_INSU_VALUE_FORGN_CUR", "TOTAL INSU VALUE(FORGN CUR)"],
+    "INSURANCE_CURRENCY": ["INSURANCE_CURRENCY"],
+    "TOTAL_INVOICE_VALUE_INR": ["TOTAL_INVOICE_VALUE_INR"],
+    "INSURANCE_VALUE_INR": ["INSURANCE_VALUE_INR"],
+    "TOTAL_GROSS_WEIGHT": ["TOTAL_GROSS_WEIGHT", "TOTAL GROSS WEIGHT"],
+    "TOTAL_FREIGHT_VALUE_INR": ["TOTAL_FREIGHT_VALUE_INR"],
+    "GROSS_WEIGHT_UNIT": ["GROSS_WEIGHT_UNIT", "GROSS WEIGHT UNIT"],
+    "CUSTOM_NOTIFICATION": ["CUSTOM_NOTIFICATION"],
+    "STANDARD_QUANTITY": ["STANDARD_QUANTITY", "STANDARD QUANTITY"],
+    "STANDARD_QUANTITY_UNIT": ["STANDARD_QUANTITY_UNIT", "STANDARD QUANTITY UNIT"]
+}
+
 def cols_string():
     cols_string = ""
     for i in cols.split(", "):
@@ -233,17 +304,40 @@ def check_new_file():
             files.sort()
             
             for k in files:
+                print(f"Data/Excel_files/{i}/{i}-{j}/{k}")
                 if k.endswith(".xlsx"):
-                    print(f"Data/Excel_files/{i}/{i}-{j}/{k}")
-                    # writer = pd.ExcelWriter(f"Data/Excel_files/{i}/{i}-{j}/{k}")
-                    # writer.close()
+                    df = pd.read_excel(f"Data/Excel_Files/{i}/{i}-{j}/{k}", header = 0, engine="openpyxl")
+                    df_new = pd.DataFrame(columns=cols.split(", "))
+                    
+                    if len(df.columns) < 60:
+                        print(df.shape)
+                        for old_col in column_map:
+                            exist = False
+                            for map_col in column_map[old_col]:
+                                if map_col in df.columns:
+                                    # df.rename(columns={j:i}, inplace=True)
+                                    df_new[old_col] = df[map_col]
+                                    print(old_col, map_col)
+                                    exist = True
+                            if not exist:
+                                df_new[old_col] = np.nan
+                                print(old_col, "Empty")
+                        df_new["PRODUCT_DESCRIPTION"] = df_new["PRODUCT_DESCRIPTION"].str.replace(";", " ", regex=False)
+                        
+                        # df_new.to_csv(f"Data/Excel_Files/{i}/{i}-{j}/{k[:-5]}.csv", sep=",", index=False, header=True)
+                        os.remove(f"Data/Excel_Files/{i}/{i}-{j}/{k}")
+                        df_new.to_excel(f"Data/Excel_Files/{i}/{i}-{j}/{k}", index=False, header=True)
+
                     df = pd.read_excel(f"Data/Excel_Files/{i}/{i}-{j}/{k}", names = cols.split(", "), dtype=dtypes, converters=converters, engine="openpyxl")
                     if(df.shape[0] < 3):
                         continue
                     print(df.shape)
+                    
                     df.to_csv(f"Data/Excel_Files/{i}/{i}-{j}/{k[:-5]}.csv", index=False, header=True)
                     # os.remove(f"Data/Excel_Files/{i}/{i}-{j}/{k}")
+                    
                     k = k[:-5]+".csv"
+                
                 for chunk in pd.read_csv(f"Data/Excel_Files/{i}/{i}-{j}/{k}",dtype=dtypes,converters=converters, chunksize=50000):
                     chunk.rename(columns={"TOTAL_INSU_VALUE_ FORGN_CUR":"TOTAL_INSU_VALUE_FORGN_CUR"}, inplace=True)
                     for x in chunk.columns:
