@@ -13,10 +13,11 @@ import os
 import shutil
 import warnings
 from datetime import datetime
+from datetime import timedelta
 from pathlib import Path
 import sys
-import easygui
 import zipfile
+import calendar
 
 path_root = Path(__file__).parents[1] / "Scripts"
 sys.path.append(str(path_root))
@@ -183,8 +184,9 @@ def search(request):
     start_time = time.time()
     global dl
     # print(time.time() - start_time)
-
-
+    latest_month = (cur_main.execute("select max(stored_months) from master").fetchall()[0][0]).split("_")
+    latest_month.append(str(calendar.monthrange(int(latest_month[0]), int(latest_month[1]))[1]))
+    latest_date = "-".join(latest_month)
     if request.method == "POST":
         start_date = request.POST.get('from_date').upper()
         end_date = request.POST.get('to_date').upper()
@@ -221,8 +223,12 @@ def search(request):
         if start_date == "" or int(start_date[:4]) < 2018:
             start_date = "2018-01-01"
 
-        if end_date == "" or int(end_date[:4]) > 2023:
-            end_date = "2023-12-31"
+        
+        if end_date == "" or \
+            datetime.strptime(end_date, '%Y-%m-%d').date() < datetime.strptime(start_date, '%Y-%m-%d').date() or \
+                datetime.strptime(end_date, '%Y-%m-%d').date() > datetime.strptime(latest_date, '%Y-%m-%d').date():
+            
+            end_date = latest_date
 
 
         result_name = start_date+"_"+((supplier[21:-5]+"_"+importer[21:-5]+"_"+product[27:-5]).rstrip("_").lstrip("_"))+"_"+end_date
@@ -264,6 +270,9 @@ def search(request):
             response = HttpResponse(f.read(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
             response['Content-Disposition'] = f'attachment; filename="{result_name}.xlsx"'
             return response
-
-    context = {"today" : "2023-12-31"}
-    return render(request, 'SearchApp/Search-page.html')
+    
+    
+    
+    #send context of last month date
+    context = {"last_month" : latest_date}
+    return render(request, 'SearchApp/Search-page.html', context)
