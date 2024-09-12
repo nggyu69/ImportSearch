@@ -298,40 +298,41 @@ def check_new_file():
     print(cur_dict)
     for i in cur_dict:
         for j in cur_dict[i]:
-            print(i, j)
             t = 1
             files = os.listdir(f"Data/Excel_Files/{i}/{i}-{j}")
             files.sort()
             
             for k in files:
-                print(f"Data/Excel_files/{i}/{i}-{j}/{k}")
+                print(f"\nProccessing : Data/Excel_files/{i}/{i}-{j}/{k}")
                 if k.endswith(".xlsx"):
                     df = pd.read_excel(f"Data/Excel_Files/{i}/{i}-{j}/{k}", header = 0, engine="openpyxl")
                     df_new = pd.DataFrame(columns=cols.split(", "))
                     
                     if len(df.columns) < 60:
-                        print(df.shape)
+                        print("Non-standard format file, converting.....")
                         for old_col in column_map:
                             exist = False
                             for map_col in column_map[old_col]:
                                 if map_col in df.columns:
                                     # df.rename(columns={j:i}, inplace=True)
                                     df_new[old_col] = df[map_col]
-                                    print(old_col, map_col)
+                                    # print(old_col, map_col)
                                     exist = True
                             if not exist:
                                 df_new[old_col] = np.nan
-                                print(old_col, "Empty")
+                                # print(old_col, "Empty")
                         df_new["PRODUCT_DESCRIPTION"] = df_new["PRODUCT_DESCRIPTION"].str.replace(";", " ", regex=False)
-                        
+                        print("Converted")
                         # df_new.to_csv(f"Data/Excel_Files/{i}/{i}-{j}/{k[:-5]}.csv", sep=",", index=False, header=True)
                         os.remove(f"Data/Excel_Files/{i}/{i}-{j}/{k}")
+                        print("Deleted")
                         df_new.to_excel(f"Data/Excel_Files/{i}/{i}-{j}/{k}", index=False, header=True)
-
+                        print("Saved in standard format")
+                    
                     df = pd.read_excel(f"Data/Excel_Files/{i}/{i}-{j}/{k}", names = cols.split(", "), dtype=dtypes, converters=converters, engine="openpyxl")
                     if(df.shape[0] < 3):
                         continue
-                    print(df.shape)
+                    print("File shape : ", df.shape)
                     
                     df.to_csv(f"Data/Excel_Files/{i}/{i}-{j}/{k[:-5]}.csv", index=False, header=True)
                     # os.remove(f"Data/Excel_Files/{i}/{i}-{j}/{k}")
@@ -347,8 +348,9 @@ def check_new_file():
                     chunk.to_sql("Data_"+i, conn, if_exists="append", index=False)
                     print(i,":", j, ":", t, "done")
                     t += 1
+                print()
             sl_no += 1
-            print(sl_no, i+"_"+j)
+            print("Writing to master table : ", sl_no, i+"_"+j)
             cur.execute("INSERT INTO master VALUES (?,?)", (sl_no, i+"_"+j))
         
         conn.commit()

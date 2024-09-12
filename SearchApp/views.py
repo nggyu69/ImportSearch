@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-import threading
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
+import tempfile
 import pandas as pd
 import sqlite3
 import time
@@ -129,11 +131,19 @@ def home(request):
 def insert(request):
     import create_table
 
-    if request.method == "POST":
+    if request.method == 'POST' and request.FILES.get('file'):
         date = request.POST.get('Month')
         year = date[:4]
 
-        file_path = easygui.fileopenbox(filetypes=["*.zip"])
+        uploaded_file = request.FILES['file']
+
+        print("Started insert operation for : ", request.POST.get('Month'))
+        fs = FileSystemStorage(location=tempfile.gettempdir())
+        filename = fs.save(uploaded_file.name, uploaded_file)
+        file_path = fs.path(filename)
+        print("Uploaded file : ", file_path)
+
+        # file_path = easygui.fileopenbox(filetypes=["*.zip"])
         if file_path is None:
             return render(request, 'SearchApp/Insert.html', {"month" : date})
         
@@ -155,7 +165,19 @@ def insert(request):
         create_table.check_new_file()
     
     context = {"month" : datetime.now().strftime("%Y-%m")}
-    return render(request, 'SearchApp/Insert.html', context)
+    return render(request, 'SearchApp/Upload.html', context)
+
+def upload(request):
+    if request.method == 'POST' and request.FILES.get('file'):
+        uploaded_file = request.FILES['file']
+        
+        print(request.POST.get('Month'))
+        fs = FileSystemStorage(location=tempfile.gettempdir())
+        filename = fs.save(uploaded_file.name, uploaded_file)
+        file_path = fs.path(filename)
+        print(file_path)
+
+    return render(request, 'SearchApp/Upload.html')
 
 def search(request):
     start_time = time.time()
