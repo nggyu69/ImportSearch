@@ -158,11 +158,19 @@ def insert(request):
             current_num = 0
 
         with zipfile.ZipFile(file_path, 'r') as zip_ref:
-            for i, file_info in enumerate(zip_ref.infolist()):
-                if file_info.filename.endswith(".xlsx"):
-                    zip_ref.extract(file_info, f"Data/Excel_Files/{year}/{date}")
-                    os.rename(f"Data/Excel_Files/{year}/{date}/{file_info.filename}", f"Data/Excel_Files/{year}/{date}/{date}_{current_num+i}.{file_info.filename.split('.')[-1]}")
-        
+            zip_ref.extractall(tempfile.gettempdir())
+            # print(os.walk(tempfile.gettempdir()))
+            for root, dirs, files in os.walk(tempfile.gettempdir()):
+                for file in files:
+                    if file.endswith(".xlsx"):
+                        shutil.move(os.path.join(root, file), f"Data/Excel_Files/{year}/{date}/{date}_{current_num}.xlsx")
+                        current_num += 1
+        # with zipfile.ZipFile(file_path, 'r') as zip_ref:
+        #     for i, file_info in enumerate(zip_ref.infolist()):
+        #         if file_info.filename.endswith(".xlsx"):
+        #             zip_ref.extract(file_info, f"Data/Excel_Files/{year}/{date}")
+        #             os.rename(f"Data/Excel_Files/{year}/{date}/{file_info.filename}", f"Data/Excel_Files/{year}/{date}/{date}_{current_num+i}.{file_info.filename.split('.')[-1]}")
+        sys.exit()
         create_table.check_new_file()
     
     context = {"month" : datetime.now().strftime("%Y-%m")}
