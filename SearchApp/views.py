@@ -170,7 +170,7 @@ def insert(request):
         #         if file_info.filename.endswith(".xlsx"):
         #             zip_ref.extract(file_info, f"Data/Excel_Files/{year}/{date}")
         #             os.rename(f"Data/Excel_Files/{year}/{date}/{file_info.filename}", f"Data/Excel_Files/{year}/{date}/{date}_{current_num+i}.{file_info.filename.split('.')[-1]}")
-        sys.exit()
+        
         create_table.check_new_file()
     
     context = {"month" : datetime.now().strftime("%Y-%m")}
