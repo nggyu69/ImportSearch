@@ -1,5 +1,4 @@
 import pandas as pd
-from elasticsearch import Elasticsearch
 import numpy as np
 import sqlite3
 import time
@@ -10,7 +9,7 @@ import sys
 
 cols = "BE_NO, BEDATE, HS_CODE, PRODUCT_DESCRIPTION, QUANTITY, UNIT, ASSESS_VALUE_INR, UNIT_PRICE_INR, ASSESS_VALUE_USD, UNIT_PRICE_USD, TOTAL_DUTY, TOTAL_DUTY_BE_WISE, APPLICABLE_DUTY_INR, EXCHANGE_RATE_USD, ITEM_RATE_INV_CURR, VALUE_INV_CURR, INVOICE_CURRENCY, ASSESS_GROUP, IMPORTER_CODE, IMPORTER_NAME, IMPORTER_ADDRESS, IMPORTER_CITY, IMPORTER_PIN, IMPORTER_STATE, SUPPLIER_CODE, SUPPLIER_NAME, SUPPLIER_ADDRESS, SUPPLIER_COUNTRY, FOREIGN_PORT, FOREIGN_COUNTRY, FOREIGN_REGIONS, CHA_NAME, CHA_PAN, IEC, IEC_CODE, INVOICE_NUMBER, INVOICE_SR_NO, ITEM_NUMBER, HSCODE_2DIGIT, HSCODE_4DIGIT, TYPE, INDIAN_PORT, SHIPMENT_MODE, INDIAN_REGIONS, SHIPMENT_PORT, HSCODE_6DIGIT, BCD_NOTN, BCD_RATE, BCD_AMOUNT_INR, CVD_NOTN, CVD_RATE, CVD_AMOUNT_INR, IGST_AMOUNT_INR, GST_CESS_AMOUNT_INR, REMARK, INCOTERMS, TOTAL_FREIGHT_VALUE_FORGN_CUR, FREIGHT_CURRENCY, TOTAL_INSU_VALUE_FORGN_CUR, INSURANCE_CURRENCY, TOTAL_INVOICE_VALUE_INR, INSURANCE_VALUE_INR, TOTAL_GROSS_WEIGHT, TOTAL_FREIGHT_VALUE_INR, GROSS_WEIGHT_UNIT, CUSTOM_NOTIFICATION, STANDARD_QUANTITY, STANDARD_QUANTITY_UNIT"
 
-conn = sqlite3.connect("Data/Databases/Data.sqlite3")
+conn = sqlite3.connect("Data/Databases/Data.sqlite3", check_same_thread=False)
 cur = conn.cursor()
 cur.execute("""CREATE TABLE if not exists "master" (
 	"sl_no"	INTEGER,
@@ -254,7 +253,7 @@ def create_table(year):
         return
     else:
         cur.execute(f"CREATE TABLE if not exists Data_{year} ({cols_string()})")
-        cur.execute(f"create virtual table Data_{year}_virt_searcher using fts5(PRODUCT_DESCRIPTION, IMPORTER_NAME, SUPPLIER_NAME, content = 'Data_{year}', tokenize = 'trigram')")
+        # cur.execute(f"create virtual table if not exists Data_{year}_virt_searcher using fts5(PRODUCT_DESCRIPTION, IMPORTER_NAME, SUPPLIER_NAME, content = 'Data_{year}', tokenize = 'trigram')")
         cur.execute(f"""create trigger Data_{year}_virt_searcher_insert after insert on Data_{year} 
                         begin 
                         insert into Data_{year}_virt_searcher(rowid, PRODUCT_DESCRIPTION, IMPORTER_NAME, SUPPLIER_NAME) values (new.rowid, new.PRODUCT_DESCRIPTION, new.IMPORTER_NAME, new.SUPPLIER_NAME); 

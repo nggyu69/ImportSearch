@@ -5,7 +5,6 @@ name = "pypi"
 
 [packages]
 pandas = "*"
-elasticsearch = "*"
 django = "*"
 xlsxwriter = "*"
 pyarrow = "*"
@@ -13,7 +12,6 @@ urllib3 = "*"
 numpy = "*"
 openpyxl = "*"
 easygui = "*"
-global-state = "*"
 
 [dev-packages]
 
