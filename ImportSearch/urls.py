@@ -23,5 +23,5 @@ urlpatterns = [
     # path('', views.home, name='search-page'),
     path('', views.search, name='search'),
     path('insert/', views.insert, name='insert'),
-    path('upload/', views.upload, name="upload")
+    path('search_bom/', views.search_bom, name="search_bom")
 ]

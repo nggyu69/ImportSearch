@@ -31,8 +31,13 @@ cur_main = conn_main.cursor()
 
 count_lis = []
 df_dict = {}
-
 process_dict = {}
+
+def get_latest_date():
+    latest_month = (cur_main.execute("select max(stored_months) from master").fetchall()[0][0]).split("_")
+    latest_month.append(str(calendar.monthrange(int(latest_month[0]), int(latest_month[1]))[1]))
+    return "-".join(latest_month)
+
 def run_query(query, year, dict1):
     conn = sqlite3.connect(f"Data/Databases/Data.sqlite3")
     df1 = pd.read_sql_query(query, conn)
@@ -165,16 +170,11 @@ def insert(request):
                     if file.endswith(".xlsx"):
                         shutil.move(os.path.join(root, file), f"Data/Excel_Files/{year}/{date}/{date}_{current_num}.xlsx")
                         current_num += 1
-        # with zipfile.ZipFile(file_path, 'r') as zip_ref:
-        #     for i, file_info in enumerate(zip_ref.infolist()):
-        #         if file_info.filename.endswith(".xlsx"):
-        #             zip_ref.extract(file_info, f"Data/Excel_Files/{year}/{date}")
-        #             os.rename(f"Data/Excel_Files/{year}/{date}/{file_info.filename}", f"Data/Excel_Files/{year}/{date}/{date}_{current_num+i}.{file_info.filename.split('.')[-1]}")
         
         create_table.check_new_file()
     
     context = {"month" : datetime.now().strftime("%Y-%m")}
-    return render(request, 'SearchApp/Upload.html', context)
+    return render(request, 'SearchApp/Insert.html', context)
 
 def upload(request):
     if request.method == 'POST' and request.FILES.get('file'):
@@ -188,13 +188,37 @@ def upload(request):
 
     return render(request, 'SearchApp/Upload.html')
 
+def search_bom(request):
+    if request.method == 'POST' and request.FILES.get('file'):
+        uploaded_file = request.FILES['file']
+        
+        start_time = time.time()
+        print("Starting BOM search")
+        fs = FileSystemStorage(location=tempfile.gettempdir())
+        filename = fs.save(uploaded_file.name, uploaded_file)
+        file_path = fs.path(filename)
+        print("Uploaded file : ", file_path)
+
+        df = pd.read_excel(file_path, sheet_name="E_BOM", skiprows=5, skipfooter=2)
+        parts = df["MPN"].tolist()
+
+        final_df = pd.DataFrame()
+        for part in parts:
+            if type(part) == str and part.strip != "":
+                part_dict = create_batch("2018-01-01", get_latest_date(), " and", " and", "PRODUCT_DESCRIPTION MATCH '\"" + part + "\"' and")
+                for year in part_dict.keys():
+                    final_df = pd.concat([final_df, part_dict[year]])
+        final_df.to_csv("Data/Results/BOM_Search.csv", index=False)
+        print("Time taken for all parts : ", time.time() - start_time)
+            
+    return render(request, 'SearchApp/Search_BOM.html')
+
 def search(request):
     start_time = time.time()
     global dl
-    # print(time.time() - start_time)
-    latest_month = (cur_main.execute("select max(stored_months) from master").fetchall()[0][0]).split("_")
-    latest_month.append(str(calendar.monthrange(int(latest_month[0]), int(latest_month[1]))[1]))
-    latest_date = "-".join(latest_month)
+
+    latest_date = get_latest_date()
+
     if request.method == "POST":
         start_date = request.POST.get('from_date').upper()
         end_date = request.POST.get('to_date').upper()
@@ -224,7 +248,7 @@ def search(request):
             product = " and"
             query_type += "0"
         else:
-            product = "PRODUCT_DESCRIPTION MATCH '" + product + "' and"
+            product = "PRODUCT_DESCRIPTION MATCH '\"" + product + "\"' and"
             query_type += "1"
 
 
@@ -239,7 +263,7 @@ def search(request):
             end_date = latest_date
 
 
-        result_name = start_date+"_"+((supplier[21:-5]+"_"+importer[21:-5]+"_"+product[27:-5]).rstrip("_").lstrip("_"))+"_"+end_date
+        result_name = start_date+"_"+(("S-"+supplier[21:-5]+"_"+"I-"+importer[21:-5]+"_"+"P-"+product[27:-5].strip("\"")).rstrip("_").lstrip("_"))+"_"+end_date
         
         if os.path.exists("Data/Results/"+result_name+"/"):
             print("Results folder already exists")

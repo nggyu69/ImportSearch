@@ -36,7 +36,6 @@
       <div class="background" style="--box-height: 700px; --box-width: 900px;">
         <div class="shape shape2"></div>
         <div class="shape shape2"></div>
-      </div>
       <form class = 'form2' action = '' method = 'post'>
         {% csrf_token %}
 
@@ -61,5 +60,16 @@
 
           <!-- <button class="excelsearch" type="submit" name="action" value="excel">Convert to Excel</button> -->
       </form>
+    
+      <button type="button" onclick="hrefFunction()">Search BOM</button>
+      </div>
+      <script>
+            
+        //Function demonstrating the Href Method
+        
+        function hrefFunction(){
+            location.href = "/search_bom";
+        }
+    </script>
   </body>
 </html>
