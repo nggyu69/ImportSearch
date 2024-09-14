@@ -170,8 +170,10 @@ def insert(request):
                 for file in files:
                     if file.endswith(".xlsx"):
                         shutil.move(os.path.join(root, file), f"Data/Excel_Files/{year}/{date}/{date}_{current_num}.xlsx")
+                        print(f"Data/Excel_Files/{year}/{date}/{date}_{current_num}.xlsx")
                         current_num += 1
         
+        shutil.rmtree(file_path)              
         create_table.check_new_file()
     
     context = {"month" : datetime.now().strftime("%Y-%m")}
