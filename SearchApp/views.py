@@ -173,7 +173,7 @@ def insert(request):
                         print(f"Data/Excel_Files/{year}/{date}/{date}_{current_num}.xlsx")
                         current_num += 1
         
-        shutil.rmtree(file_path)              
+        os.remove(file_path)              
         create_table.check_new_file()
     
     context = {"month" : datetime.now().strftime("%Y-%m")}
