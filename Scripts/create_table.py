@@ -253,7 +253,8 @@ def create_table(year):
         return
     else:
         cur.execute(f"CREATE TABLE if not exists Data_{year} ({cols_string()})")
-        # cur.execute(f"create virtual table if not exists Data_{year}_virt_searcher using fts5(PRODUCT_DESCRIPTION, IMPORTER_NAME, SUPPLIER_NAME, content = 'Data_{year}', tokenize = 'trigram')")
+        cur.execute(f"create virtual table if not exists Data_{year}_virt_searcher using fts5(PRODUCT_DESCRIPTION, IMPORTER_NAME, SUPPLIER_NAME, content = 'Data_{year}', tokenize = 'trigram')")
+        conn.commit()
         cur.execute(f"""create trigger Data_{year}_virt_searcher_insert after insert on Data_{year} 
                         begin 
                         insert into Data_{year}_virt_searcher(rowid, PRODUCT_DESCRIPTION, IMPORTER_NAME, SUPPLIER_NAME) values (new.rowid, new.PRODUCT_DESCRIPTION, new.IMPORTER_NAME, new.SUPPLIER_NAME); 
@@ -266,7 +267,7 @@ def create_table(year):
                         begin
                         update Data_{year}_virt_searcher set PRODUCT_DESCRIPTION = new.PRODUCT_DESCRIPTION, IMPORTER_NAME = new.IMPORTER_NAME, SUPPLIER_NAME = new.SUPPLIER_NAME where rowid = old.rowid;
                         end;""")
-
+        conn.commit()
 def check_new_file():
     cur_dict = {}
     current_years = os.listdir("Data/Excel_Files")
@@ -304,6 +305,9 @@ def check_new_file():
             for k in files:
                 print(f"\nProccessing : Data/Excel_files/{i}/{i}-{j}/{k}")
                 if k.endswith(".xlsx"):
+                    if k[:-5]+".csv" in files:
+                        print("CSV exists, not converting")
+                        continue
                     df = pd.read_excel(f"Data/Excel_Files/{i}/{i}-{j}/{k}", header = 0, engine="openpyxl")
                     df_new = pd.DataFrame(columns=cols.split(", "))
                     
