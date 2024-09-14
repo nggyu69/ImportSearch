@@ -18,6 +18,7 @@ from pathlib import Path
 import sys
 import zipfile
 import calendar
+import openpyxl
 
 path_root = Path(__file__).parents[1] / "Scripts"
 sys.path.append(str(path_root))
@@ -202,15 +203,75 @@ def search_bom(request):
         df = pd.read_excel(file_path, sheet_name="E_BOM", skiprows=5, skipfooter=2)
         parts = df["MPN"].tolist()
 
-        final_df = pd.DataFrame()
+        
+        bom_dict = {}
+        tempdir = tempfile.gettempdir()+"/BOM"
+
+        if os.path.exists(tempdir):
+            shutil.rmtree(tempdir)
+        os.mkdir(tempdir)
+
+        
         for part in parts:
+            final_df = pd.DataFrame()
             if type(part) == str and part.strip != "":
                 part_dict = create_batch("2018-01-01", get_latest_date(), " and", " and", "PRODUCT_DESCRIPTION MATCH '\"" + part + "\"' and")
                 for year in part_dict.keys():
                     final_df = pd.concat([final_df, part_dict[year]])
-        final_df.to_csv("Data/Results/BOM_Search.csv", index=False)
-        print("Time taken for all parts : ", time.time() - start_time)
+                
+                final_df.sort_values(by=["UNIT_PRICE_USD"], inplace=True)
+                final_df.to_csv(f"{tempdir}/{part}.csv", index=False)
+                bom_dict[part] = f"{part}.csv"
+        
+        shutil.copy(file_path, f"Data/Results/{uploaded_file.name[:-5]}_pricing.xlsx")
+        os.remove(file_path)
+        file_path = f"Data/Results/{uploaded_file.name[:-5]}_pricing.xlsx"
+
+        workbook = openpyxl.load_workbook(file_path)
+        bom_sheet = workbook["E_BOM"]
+
+        for part_name in bom_dict.keys():        
+            csvfile = f"{tempdir}/{part_name}.csv"
             
+            worksheet = workbook.create_sheet(part_name)
+            with open(csvfile, 'rt', encoding='utf8') as f:
+                reader = csv.reader(f)
+                for r, row in enumerate(reader):
+                    for c, col in enumerate(row):
+                        worksheet.cell(row=r + 1, column=c + 1, value=col)
+            
+            row = df.index[df["MPN"] == part_name].tolist()[0] + 7
+            col = df.columns.get_loc("MPN") + 1  # openpyxl uses 1-based indexing
+
+            bom_sheet.cell(row=row, column=col).value = part_name
+            bom_sheet.cell(row=row, column=col).hyperlink = f'#{part_name}!A1'
+            bom_sheet.cell(row=row, column=col).style = "Hyperlink"            
+                        
+            for col in worksheet.columns:
+                max_length = 0
+                col_letter = col[0].column_letter  # Get the column letter (A, B, C, etc.)
+                for cell in col:
+                    try:
+                        max_length = max(max_length, len(str(cell.value)))
+                    except:
+                        pass
+                # Adjust the column width slightly (add padding)
+                adjusted_width = (max_length + 2)
+                worksheet.column_dimensions[col_letter].width = adjusted_width
+
+            worksheet.auto_filter.ref = 'A1:BP1'
+            worksheet.freeze_panes = worksheet['A2']  # Freezes row 1
+            
+        workbook.save(file_path)
+        workbook.close()
+        
+        print("Time taken for all parts : ", time.time() - start_time)
+
+        with open(file_path, "rb") as f:
+            response = HttpResponse(f.read(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = f'attachment; filename="{uploaded_file.name[:-5]}_pricing.xlsx"'
+            return response
+        
     return render(request, 'SearchApp/Search_BOM.html')
 
 def search(request):
