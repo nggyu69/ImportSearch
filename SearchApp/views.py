@@ -181,7 +181,7 @@ def insert(request):
         # create_table.check_new_file(task.id, schedule=5)
         p = Process(target=create_table.check_new_file, args=(task.id,))
         p.start()
-        print(task.id)
+
         return redirect('loading', task_id=task.id)
     
     context = {"month" : datetime.now().strftime("%Y-%m")}
