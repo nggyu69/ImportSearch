@@ -1,7 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
+from django.http import JsonResponse
 import tempfile
 import pandas as pd
 import sqlite3
@@ -19,6 +20,8 @@ import sys
 import zipfile
 import calendar
 import openpyxl
+from .models import ProcessingTask
+
 
 path_root = Path(__file__).parents[1] / "Scripts"
 sys.path.append(str(path_root))
@@ -172,9 +175,14 @@ def insert(request):
                         shutil.move(os.path.join(root, file), f"Data/Excel_Files/{year}/{date}/{date}_{current_num}.xlsx")
                         print(f"Data/Excel_Files/{year}/{date}/{date}_{current_num}.xlsx")
                         current_num += 1
-        
-        os.remove(file_path)              
-        create_table.check_new_file()
+        task = ProcessingTask.objects.create(status='pending')
+
+        os.remove(file_path)         
+        # create_table.check_new_file(task.id, schedule=5)
+        p = Process(target=create_table.check_new_file, args=(task.id,))
+        p.start()
+        print(task.id)
+        return redirect('loading', task_id=task.id)
     
     context = {"month" : datetime.now().strftime("%Y-%m")}
     return render(request, 'SearchApp/Insert.html', context)
@@ -371,3 +379,12 @@ def search(request):
     #send context of last month date
     context = {"last_month" : latest_date}
     return render(request, 'SearchApp/Search-page.html', context)
+
+def loading(request, task_id):
+    # task = ProcessingTask.objects.get(id=task_id)
+    # Pass the task's status to the template to display progress
+    return render(request, 'SearchApp/Loading.html', {'task_id': task_id})
+
+def progress_status(request, task_id):
+    task = ProcessingTask.objects.get(id=task_id)
+    return JsonResponse({'progress': task.progress})

@@ -36,9 +36,9 @@
       <div class="background" style="--box-height: 700px; --box-width: 900px;">
         <div class="shape shape2"></div>
         <div class="shape shape2"></div>
-      <form class = 'form2' action = '' method = 'post'>
+      </div>
+      <form class = 'form2' method="POST">
         {% csrf_token %}
-
           <h4>Search data</h4>
 
           <label class="Product-Description" for="PD">
@@ -57,12 +57,10 @@
           <input placeholder='To Date or 31/12/2022' class="textbox-n" type="text" onfocus="(this.type='date')" id="date" name="to_date" value={{ last_month }} min="2018-01-01" max={{ last_month }}>
 
           <button class="buttonsearch" type="submit" name="action" value="search">Results</button>
-
-          <!-- <button class="excelsearch" type="submit" name="action" value="excel">Convert to Excel</button> -->
       </form>
     
       <button type="button" onclick="hrefFunction()">Search BOM</button>
-      </div>
+      
       <script>
             
         //Function demonstrating the Href Method

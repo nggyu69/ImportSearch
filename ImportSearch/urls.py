@@ -23,5 +23,7 @@ urlpatterns = [
     # path('', views.home, name='search-page'),
     path('', views.search, name='search'),
     path('insert/', views.insert, name='insert'),
-    path('search_bom/', views.search_bom, name="search_bom")
+    path('search_bom/', views.search_bom, name="search_bom"),
+    path('loading/<int:task_id>/', views.loading, name='loading'),
+    path('progress_status/<int:task_id>/', views.progress_status, name='progress_status'),
 ]

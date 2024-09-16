@@ -4,6 +4,7 @@ import sqlite3
 import time
 import os
 import sys
+from SearchApp.models import ProcessingTask
 
 # os.chdir("..")
 
@@ -268,7 +269,14 @@ def create_table(year):
                         update Data_{year}_virt_searcher set PRODUCT_DESCRIPTION = new.PRODUCT_DESCRIPTION, IMPORTER_NAME = new.IMPORTER_NAME, SUPPLIER_NAME = new.SUPPLIER_NAME where rowid = old.rowid;
                         end;""")
         conn.commit()
-def check_new_file():
+
+def check_new_file(task_id):
+    print(f"Insert task {task_id} processing started.")
+    task = ProcessingTask.objects.get(id=task_id)
+    task.status = 'processing'
+    task.progress = 0  # Initial progress set to 0%
+    task.save()
+
     cur_dict = {}
     current_years = os.listdir("Data/Excel_Files")
     current_years.sort()
@@ -296,12 +304,18 @@ def check_new_file():
         for j in prev_dict[i]:
             cur_dict[i].remove(j)
     print(cur_dict)
+
+    total_files = 0
+    for i in cur_dict:
+        for j in cur_dict[i]:
+            files = os.listdir(f"Data/Excel_Files/{i}/{i}-{j}")
+            files.sort()
+            total_files = len([file for file in files if file.endswith(".xlsx")])
+    
+    processed_files = 0
     for i in cur_dict:
         for j in cur_dict[i]:
             t = 1
-            files = os.listdir(f"Data/Excel_Files/{i}/{i}-{j}")
-            files.sort()
-            
             for k in files:
                 print(f"\nProccessing : Data/Excel_files/{i}/{i}-{j}/{k}")
                 if k.endswith(".xlsx"):
@@ -352,16 +366,23 @@ def check_new_file():
                     print(i,":", j, ":", t, "done")
                     t += 1
                 print()
+                print("Done with : ", k)
+
+                processed_files += 1
+                task.progress = (processed_files / total_files) * 100  # Update progress
+                task.save()
+
             sl_no += 1
             print("Writing to master table : ", sl_no, i+"_"+j)
             cur.execute("INSERT INTO master VALUES (?,?)", (sl_no, i+"_"+j))
         
         conn.commit()
-        # cur.execute("create index if not exists prod_index_"+i+" on Data_"+i+" (PRODUCT_DESCRIPTION)")
-        # cur.execute("create index if not exists imp_index_"+i+" on Data_"+i+" (IMPORTER_NAME)")
-        # cur.execute("create index if not exists sup_index_"+i+" on Data_"+i+" (SUPPLIER_NAME)")
-        # conn.commit()
 
+    task.status = 'completed'
+    task.progress = 100  # Set progress to 100%
+    task.save()
+
+    print(f"Insert task {task_id} processing completed.")
 
 if __name__ == "__main__":
     check_new_file()
