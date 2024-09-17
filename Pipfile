@@ -12,7 +12,6 @@ urllib3 = "*"
 numpy = "*"
 openpyxl = "*"
 easygui = "*"
-django-background-tasks = "*"
 
 [dev-packages]
 
