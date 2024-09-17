@@ -20,7 +20,6 @@ import sys
 import zipfile
 import calendar
 import openpyxl
-from .models import ProcessingTask
 
 
 path_root = Path(__file__).parents[1] / "Scripts"
@@ -140,6 +139,7 @@ def home(request):
 
 def insert(request):
     import create_table
+    from .models import ProcessingTask
 
     if request.method == 'POST' and request.FILES.get('file'):
         date = request.POST.get('Month')
@@ -386,5 +386,6 @@ def loading(request, task_id):
     return render(request, 'SearchApp/Loading.html', {'task_id': task_id})
 
 def progress_status(request, task_id):
+    from .models import ProcessingTask
     task = ProcessingTask.objects.get(id=task_id)
     return JsonResponse({'progress': task.progress})
