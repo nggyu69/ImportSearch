@@ -4,6 +4,11 @@ import sqlite3
 import time
 import os
 import sys
+import django
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ImportSearch.settings')
+django.setup()
+
 from SearchApp.models import ProcessingTask
 
 # os.chdir("..")
@@ -349,9 +354,11 @@ def check_new_file(task_id):
                     df = pd.read_excel(f"Data/Excel_Files/{i}/{i}-{j}/{k}", names = cols.split(", "), dtype=dtypes, converters=converters, engine="openpyxl")
                     if(df.shape[0] < 3):
                         continue
+                    print("Read standard format file")
                     print("File shape : ", df.shape)
                     
                     df.to_csv(f"Data/Excel_Files/{i}/{i}-{j}/{k[:-5]}.csv", index=False, header=True)
+                    print("Converted to csv")
                     # os.remove(f"Data/Excel_Files/{i}/{i}-{j}/{k}")
                     
                     k = k[:-5]+".csv"

@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+import logging
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -47,7 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     "SearchApp.apps.SearchappConfig",
-    "background_task",
+    
 ]
 
 MIDDLEWARE = [
@@ -140,3 +141,41 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Silence specific requests
+class IgnoreSpecificRequests(logging.Filter):
+    def filter(self, record):
+        # Suppress logs for the /progress_status/ path
+        return '/progress_status/' not in record.getMessage()
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'ignore_specific_requests': {
+            '()': IgnoreSpecificRequests,
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format': '{asctime} {levelname} {message}',
+            'style': '{',
+            'datefmt': '[%d/%b/%Y %H:%M:%S]',  # Adjust this to your preferred date-time format
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'filters': ['ignore_specific_requests'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',  # Add formatter here
+        },
+    },
+    'loggers': {
+        'django.server': {
+            'handlers': ['console'],
+            'level': 'INFO',  # or WARNING to log less information
+            'propagate': False,
+        },
+    },
+}
