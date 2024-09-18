@@ -314,13 +314,15 @@ def check_new_file(task_id):
     for i in cur_dict:
         for j in cur_dict[i]:
             files = os.listdir(f"Data/Excel_Files/{i}/{i}-{j}")
-            files.sort()
-            total_files = len([file for file in files if file.endswith(".xlsx")])
+            total_files += len([file for file in files if file.endswith(".xlsx")])
+    print("Total files : ", total_files)
     
     processed_files = 0
     for i in cur_dict:
         for j in cur_dict[i]:
             t = 1
+            files = os.listdir(f"Data/Excel_Files/{i}/{i}-{j}")
+            files.sort()
             for k in files:
                 print(f"\nProccessing : Data/Excel_files/{i}/{i}-{j}/{k}")
                 if k.endswith(".xlsx"):
