@@ -8,7 +8,8 @@ import pandas as pd
 import sqlite3
 import time
 from multiprocessing import Process, Manager
-from xlsxwriter.workbook import Workbook
+# from xlsxwriter.workbook import Workbook
+from pyexcelerate import Workbook, Style, Alignment, Panes
 import csv
 import os
 import shutil
@@ -20,7 +21,7 @@ import sys
 import zipfile
 import calendar
 import openpyxl
-
+# import modin.experimental.pandas as mpd
 
 path_root = Path(__file__).parents[1] / "Scripts"
 sys.path.append(str(path_root))
@@ -115,24 +116,12 @@ def create_batch(start_date, end_date, supplier, importer, product):
         print(query)
         print()
     
-    # flag = True
-    # while(flag):
-    #     flag = False
-    #     for year in df_dict.keys():
-    #         if(dict1[year] is not None and df_dict[year] is None):
-    #             print("Done with", year)
-    #             print(len(dict1[year]))
-    #             df_dict[year] = dict1[year]
-    #     for year in df_dict.keys():
-    #         if(df_dict[year] is None):
-    #             flag = True
-    #             break    
     for process in process_dict.values():
         for p in process:
             p.join()
 
     print("Time taken to retrieve results : ", time.time() - start_time_query)
-    return dict1
+    return dict1, time.time()
 
 def home(request):
     return render(request, 'SearchApp/Home.html')
@@ -346,28 +335,53 @@ def search(request):
             print("Results folder does not exist, creating now")
             os.mkdir("Data/Results/"+result_name+"/")
 
-            dict1 = create_batch(start_date, end_date, supplier, importer, product)
+            dict1, prev_time  = create_batch(start_date, end_date, supplier, importer, product)
 
             for year in dict1.keys():
                 df = pd.concat([df, dict1[year]])
 
+            print("Time taken to concatenate:", time.time() - prev_time)
             print(df.shape)
-            df.to_csv("Data/Results/"+result_name+"/"+f"{result_name}.csv", index=False)
 
+            prev_time = time.time()
+            df.to_csv("Data/Results/"+result_name+"/"+f"{result_name}.csv", index=False)
+            print("Time taken to save csv:", time.time() - prev_time)
+
+            prev_time = time.time()
             csvfile = f"Data/Results/{result_name}/{result_name}.csv"
-            workbook = Workbook(f"Data/Results/{result_name}/{result_name}.xlsx")
-            worksheet = workbook.add_worksheet()
+            # workbook = Workbook(f"Data/Results/{result_name}/{result_name}.xlsx")
+            # worksheet = workbook.add_worksheet()
+            # with open(csvfile, 'rt', encoding='utf8') as f:
+            #     reader = csv.reader(f)
+            #     for r, row in enumerate(reader):
+            #         for c, col in enumerate(row):
+            #             worksheet.write(r, c, col)
+            # worksheet.autofit()
+            # worksheet.autofilter('A1:BP1')
+            # worksheet.freeze_panes(1, 0)
+            # workbook.close()
+
             with open(csvfile, 'rt', encoding='utf8') as f:
                 reader = csv.reader(f)
-                for r, row in enumerate(reader):
-                    for c, col in enumerate(row):
-                        worksheet.write(r, c, col)
-            worksheet.autofit()
-            worksheet.autofilter('A1:BP1')
-            worksheet.freeze_panes(1, 0)
-            workbook.close()
+                data = list(reader) 
+            print("Time taken to read csv:", time.time() - prev_time)
 
-        print("Time taken : ",time.time() - start_time)
+            prev_time = time.time()
+            wb = Workbook()
+            ws = wb.new_sheet("Sheet1", data=data)
+
+            column_widths = [max(len(str(cell)) for cell in col) for col in zip(*data)]
+            for col_idx, width in enumerate(column_widths, start=1):
+                ws.set_col_style(col_idx, Style(alignment=Alignment(horizontal="left")))  # Align text
+                ws.set_col_style(col_idx, Style(size=max(10, min(width + 2, 50))))  # Set width limit            
+
+            ws.auto_filter = "A1:BP1"
+            ws.panes = Panes(1, 0)
+
+            wb.save(f"Data/Results/{result_name}/{result_name}.xlsx")
+            print("Time taken to save xlsx:", time.time() - prev_time)
+
+        print("Total Time taken : ",time.time() - start_time)
         
         with open("Data/Results/"+result_name+"/"+f"{result_name}.xlsx", "rb") as f:
             response = HttpResponse(f.read(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
