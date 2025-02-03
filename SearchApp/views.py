@@ -278,6 +278,7 @@ def search(request):
     global dl
 
     latest_date = get_latest_date()
+    current_date = datetime.now().strftime("%Y-%m-%d")
 
     if request.method == "POST":
         start_date = request.POST.get('from_date').upper()
@@ -341,7 +342,7 @@ def search(request):
                 df = pd.concat([df, dict1[year]])
 
             print("Time taken to concatenate:", time.time() - prev_time)
-            print(df.shape)
+            print("Total (rows, columns): ", df.shape)
 
             prev_time = time.time()
             df.to_csv("Data/Results/"+result_name+"/"+f"{result_name}.csv", index=False)
@@ -389,7 +390,7 @@ def search(request):
             return response
     
     
-    current_date = datetime.now().strftime("%Y-%m-%d")
+    
     #send context of last month date
     context = {"current_date" : current_date}
     return render(request, 'SearchApp/Search-page.html', context)
