@@ -389,9 +389,9 @@ def search(request):
             return response
     
     
-    
+    current_date = datetime.now().strftime("%Y-%m-%d")
     #send context of last month date
-    context = {"last_month" : latest_date}
+    context = {"current_date" : current_date}
     return render(request, 'SearchApp/Search-page.html', context)
 
 def loading(request, task_id):
