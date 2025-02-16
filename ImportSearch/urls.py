@@ -22,6 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # path('', views.home, name='search-page'),
     path('', views.search, name='search'),
+    path('results/', views.results, name='results'),
     path('insert/', views.insert, name='insert'),
     path('search_bom/', views.search_bom, name="search_bom"),
     path('loading/<int:task_id>/', views.loading, name='loading'),

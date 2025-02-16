@@ -8,7 +8,7 @@ import pandas as pd
 import sqlite3
 import time
 from multiprocessing import Process, Manager
-# from xlsxwriter.workbook import Workbook
+from xlsxwriter.workbook import Workbook as xlsxWorkbook
 from pyexcelerate import Workbook, Style, Alignment, Panes
 import csv
 import os
@@ -21,6 +21,7 @@ import sys
 import zipfile
 import calendar
 import openpyxl
+import json
 # import modin.experimental.pandas as mpd
 
 path_root = Path(__file__).parents[1] / "Scripts"
@@ -36,6 +37,8 @@ cur_main = conn_main.cursor()
 count_lis = []
 df_dict = {}
 process_dict = {}
+
+results_cache = {}
 
 def get_latest_date():
     latest_month = (cur_main.execute("select max(stored_months) from master").fetchall()[0][0]).split("_")
@@ -314,6 +317,7 @@ def search(request):
 
 
         if start_date == "" or int(start_date[:4]) < 2018:
+            print(start_date)
             start_date = "2018-01-01"
 
         
@@ -344,46 +348,57 @@ def search(request):
             print("Time taken to concatenate:", time.time() - prev_time)
             print("Total (rows, columns): ", df.shape)
 
+            results = df.to_dict('records')
+            columns = [{'field': col, 'headerName': col} for col in df.columns]
+            results_cache["latest"] = [results, columns]
             prev_time = time.time()
             df.to_csv("Data/Results/"+result_name+"/"+f"{result_name}.csv", index=False)
             print("Time taken to save csv:", time.time() - prev_time)
 
             prev_time = time.time()
             csvfile = f"Data/Results/{result_name}/{result_name}.csv"
-            # workbook = Workbook(f"Data/Results/{result_name}/{result_name}.xlsx")
-            # worksheet = workbook.add_worksheet()
-            # with open(csvfile, 'rt', encoding='utf8') as f:
-            #     reader = csv.reader(f)
-            #     for r, row in enumerate(reader):
-            #         for c, col in enumerate(row):
-            #             worksheet.write(r, c, col)
-            # worksheet.autofit()
-            # worksheet.autofilter('A1:BP1')
-            # worksheet.freeze_panes(1, 0)
-            # workbook.close()
-
+            print("Time taken to read csv:", time.time() - prev_time)
+            
+            prev_time = time.time()
+            workbook = xlsxWorkbook(f"Data/Results/{result_name}/{result_name}.xlsx")
+            worksheet = workbook.add_worksheet()
             with open(csvfile, 'rt', encoding='utf8') as f:
                 reader = csv.reader(f)
-                data = list(reader) 
-            print("Time taken to read csv:", time.time() - prev_time)
-
-            prev_time = time.time()
-            wb = Workbook()
-            ws = wb.new_sheet("Sheet1", data=data)
-
-            column_widths = [max(len(str(cell)) for cell in col) for col in zip(*data)]
-            for col_idx, width in enumerate(column_widths, start=1):
-                ws.set_col_style(col_idx, Style(alignment=Alignment(horizontal="left")))  # Align text
-                ws.set_col_style(col_idx, Style(size=max(10, min(width + 2, 50))))  # Set width limit            
-
-            ws.auto_filter = "A1:BP1"
-            ws.panes = Panes(1, 0)
-
-            wb.save(f"Data/Results/{result_name}/{result_name}.xlsx")
+                for r, row in enumerate(reader):
+                    for c, col in enumerate(row):
+                        worksheet.write(r, c, col)
+            worksheet.autofit()
+            worksheet.autofilter('A1:BP1')
+            worksheet.freeze_panes(1, 0)
+            workbook.close()
             print("Time taken to save xlsx:", time.time() - prev_time)
+
+            ######################################################
+            # with open(csvfile, 'rt', encoding='utf8') as f:
+            #     reader = csv.reader(f)
+            #     data = list(reader) 
+            # print("Time taken to read csv:", time.time() - prev_time)
+
+            # prev_time = time.time()
+            # wb = Workbook()
+            # ws = wb.new_sheet("Sheet1", data=data)
+
+            # column_widths = [max(len(str(cell)) for cell in col) for col in zip(*data)]
+            # for col_idx, width in enumerate(column_widths, start=1):
+            #     ws.set_col_style(col_idx, Style(alignment=Alignment(horizontal="left")))  # Align text
+            #     ws.set_col_style(col_idx, Style(size=max(10, min(width + 2, 50))))  # Set width limit            
+
+            # ws.auto_filter = "A1:BP1"
+            # ws.panes = Panes(1, 0)
+
+            # wb.save(f"Data/Results/{result_name}/{result_name}.xlsx")
+            # print("Time taken to save xlsx:", time.time() - prev_time)
+            ######################################################
 
         print("Total Time taken : ",time.time() - start_time)
         
+        # return redirect('results')
+        # return render(request, "SearchApp/Results.html", {"results": results})
         with open("Data/Results/"+result_name+"/"+f"{result_name}.xlsx", "rb") as f:
             response = HttpResponse(f.read(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
             response['Content-Disposition'] = f'attachment; filename="{result_name}.xlsx"'
@@ -394,6 +409,12 @@ def search(request):
     #send context of last month date
     context = {"current_date" : current_date}
     return render(request, 'SearchApp/Search-page.html', context)
+
+def results(request):
+    data = results_cache["latest"][0]
+    columns = results_cache["latest"][1]
+    print("Results: ", results)
+    return render(request, 'SearchApp/Results.html', {'row_data': data, 'column_defs': columns})
 
 def loading(request, task_id):
     # task = ProcessingTask.objects.get(id=task_id)

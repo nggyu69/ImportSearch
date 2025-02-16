@@ -5,6 +5,7 @@ import time
 import os
 import sys
 import django
+from python_calamine import CalamineWorkbook
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ImportSearch.settings')
 django.setup()
@@ -307,7 +308,8 @@ def check_new_file(task_id):
     print(prev_dict)
     for i in prev_dict:
         for j in prev_dict[i]:
-            cur_dict[i].remove(j)
+            if i in cur_dict and j in cur_dict[i]:
+                cur_dict[i].remove(j)
     print(cur_dict)
 
     total_files = 0
@@ -325,13 +327,21 @@ def check_new_file(task_id):
             files.sort()
             for k in files:
                 print(f"\nProccessing : Data/Excel_files/{i}/{i}-{j}/{k}")
-                if k.endswith(".xlsx"):
-                    if k[:-5]+".csv" in files:
-                        print("CSV exists, not converting")
-                        continue
-                    df = pd.read_excel(f"Data/Excel_Files/{i}/{i}-{j}/{k}", header = 0, engine="openpyxl")
+                if k.endswith(".xlsx") and (k[:-5] + ".csv" not in files):
+                    # df = pd.read_excel(f"Data/Excel_Files/{i}/{i}-{j}/{k}", header = 0, engine="openpyxl")
+                    ##Read excel using python calamine
+                    excel_file_path = CalamineWorkbook.from_path(f"Data/Excel_Files/{i}/{i}-{j}/{k}")
+                    data = excel_file_path.get_sheet_by_index(0).to_python()
+                    col = data[0]
+                    value = data[1:]
+                    df = pd.DataFrame(value, columns=col)
                     df_new = pd.DataFrame(columns=cols.split(", "))
                     
+                    ##Skip if file empty
+                    if(df.shape[0] < 3):
+                        continue
+                    
+                    ##For newer format of files
                     if len(df.columns) < 60:
                         print("Non-standard format file, converting.....")
                         for old_col in column_map:
@@ -350,12 +360,11 @@ def check_new_file(task_id):
                         # df_new.to_csv(f"Data/Excel_Files/{i}/{i}-{j}/{k[:-5]}.csv", sep=",", index=False, header=True)
                         os.remove(f"Data/Excel_Files/{i}/{i}-{j}/{k}")
                         print("Deleted")
-                        df_new.to_excel(f"Data/Excel_Files/{i}/{i}-{j}/{k}", index=False, header=True)
-                        print("Saved in standard format")
+                        # df_new.to_excel(f"Data/Excel_Files/{i}/{i}-{j}/{k}", index=False, header=True)
+                        # print("Saved in standard format")
+                        df = df_new
                     
-                    df = pd.read_excel(f"Data/Excel_Files/{i}/{i}-{j}/{k}", names = cols.split(", "), dtype=dtypes, converters=converters, engine="openpyxl")
-                    if(df.shape[0] < 3):
-                        continue
+                    # df = pd.read_excel(f"Data/Excel_Files/{i}/{i}-{j}/{k}", names = cols.split(", "), dtype=dtypes, converters=converters, engine="openpyxl")
                     print("Read standard format file")
                     print("File shape : ", df.shape)
                     
