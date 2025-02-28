@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
+from django.http import HttpRequest
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from django.http import JsonResponse
@@ -21,7 +22,9 @@ import sys
 import zipfile
 import calendar
 import openpyxl
-import json
+import numpy as np
+from urllib.parse import urlencode
+import Scripts.create_table as create_table
 # import modin.experimental.pandas as mpd
 
 path_root = Path(__file__).parents[1] / "Scripts"
@@ -123,50 +126,58 @@ def create_batch(start_date, end_date, supplier, importer, product):
         for p in process:
             p.join()
 
-    print("Time taken to retrieve results : ", time.time() - start_time_query)
+    print("Time taken to retrieve results : ", round(time.time() - start_time_query, 2))
     return dict1, time.time()
 
 def home(request):
     return render(request, 'SearchApp/Home.html')
 
 def insert(request):
-    import create_table
+    # import create_table
     from .models import ProcessingTask
 
     if request.method == 'POST' and request.FILES.get('file'):
-        date = request.POST.get('Month')
-        year = date[:4]
+        # date = request.POST.get('Month')
+        # year = date[:4]
 
         uploaded_file = request.FILES['file']
 
+        temppath = f"{tempfile.gettempdir()}/temp_insert/"
+        os.makedirs(temppath, exist_ok=True)
         print("Started insert operation for : ", request.POST.get('Month'))
-        fs = FileSystemStorage(location=tempfile.gettempdir())
+        fs = FileSystemStorage(location=temppath)
         filename = fs.save(uploaded_file.name, uploaded_file)
         file_path = fs.path(filename)
         print("Uploaded file : ", file_path)
 
         # file_path = easygui.fileopenbox(filetypes=["*.zip"])
         if file_path is None:
-            return render(request, 'SearchApp/Insert.html', {"month" : date})
+            return render(request, 'SearchApp/Insert.html')
         
-        os.makedirs(f"Data/Excel_Files/{year}/{date}", exist_ok=True)
-        current_files = os.listdir(f"Data/Excel_Files/{year}/{date}")
-        current_files.sort()
-        if(len(current_files) > 0):
-            current_num = int(current_files[-1].split("_")[-1].split(".")[0])
-            current_num += 1
-        else:
-            current_num = 0
-
         with zipfile.ZipFile(file_path, 'r') as zip_ref:
-            zip_ref.extractall(tempfile.gettempdir())
+            zip_ref.extractall(temppath)
             # print(os.walk(tempfile.gettempdir()))
-            for root, dirs, files in os.walk(tempfile.gettempdir()):
+            for root, dirs, files in os.walk(temppath):
                 for file in files:
                     if file.endswith(".xlsx"):
-                        shutil.move(os.path.join(root, file), f"Data/Excel_Files/{year}/{date}/{date}_{current_num}.xlsx")
-                        print(f"Data/Excel_Files/{year}/{date}/{date}_{current_num}.xlsx")
-                        current_num += 1
+                        filedate = file.split('.')[0].split('_')[-2]
+                        year= int("20" + filedate[3:])
+                        month = f"{year}-{str(datetime.strptime(filedate[:3], "%b").month).zfill(2)}"
+
+                        os.makedirs(f"Data/Excel_Files/{year}/{month}", exist_ok=True)
+                        
+                        current_files = os.listdir(f"Data/Excel_Files/{year}/{month}")
+                        # current_files.sort()
+                        if(len(current_files) > 0):
+                            current_num = len(current_files) - 1
+                            current_num += 1
+                        else:
+                            current_num = 0
+                        
+                        shutil.move(os.path.join(root, file), f"Data/Excel_Files/{year}/{month}/{month}_{current_num}.xlsx")
+                        print(f"Data/Excel_Files/{year}/{month}/{month}_{current_num}.xlsx")
+
+
         task = ProcessingTask.objects.create(status='pending')
 
         os.remove(file_path)         
@@ -176,8 +187,8 @@ def insert(request):
 
         return redirect('loading', task_id=task.id)
     
-    context = {"month" : datetime.now().strftime("%Y-%m")}
-    return render(request, 'SearchApp/Insert.html', context)
+    # context = {"month" : datetime.now().strftime("%Y-%m")}
+    return render(request, 'SearchApp/Insert.html')
 
 def upload(request):
     if request.method == 'POST' and request.FILES.get('file'):
@@ -267,7 +278,7 @@ def search_bom(request):
         workbook.save(file_path)
         workbook.close()
         
-        print("Time taken for all parts : ", time.time() - start_time)
+        print("Time taken for all parts : ", round(time.time() - start_time, 2))
 
         with open(file_path, "rb") as f:
             response = HttpResponse(f.read(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -278,12 +289,13 @@ def search_bom(request):
 
 def search(request):
     start_time = time.time()
-    global dl
 
     latest_date = get_latest_date()
     current_date = datetime.now().strftime("%Y-%m-%d")
 
     if request.method == "POST":
+        action = request.POST.get('action')
+
         start_date = request.POST.get('from_date').upper()
         end_date = request.POST.get('to_date').upper()
         supplier = request.POST.get('SN').upper()
@@ -330,11 +342,21 @@ def search(request):
 
         result_name = start_date+"_"+(("S-"+supplier[21:-5]+"_"+"I-"+importer[21:-5]+"_"+"P-"+product[27:-5].strip("\"")).rstrip("_").lstrip("_"))+"_"+end_date
         
-        if os.path.exists("Data/Results/"+result_name+"/"):
+        
+        if os.path.exists(f"Data/Results/{result_name}/"):
             print("Results folder already exists")
-            while(not os.path.exists(f"Data/Results/{result_name}/{result_name}.xlsx")):
-                pass
-            print("File exists")
+
+            loop_time = time.time()
+            while(not os.path.exists(f"Data/Results/{result_name}/{result_name}.csv")):
+                if time.time() - loop_time > 20:
+                    print("Time out")
+                    os.rmdir(f"Data/Results/{result_name}/")
+                    search(request)
+
+                time.sleep(1)
+            else:
+                print("File exists")
+                
             
         else:
             print("Results folder does not exist, creating now")
@@ -345,19 +367,22 @@ def search(request):
             for year in dict1.keys():
                 df = pd.concat([df, dict1[year]])
 
-            print("Time taken to concatenate:", time.time() - prev_time)
+            print("Time taken to concatenate:", round(time.time() - prev_time, 2))
             print("Total (rows, columns): ", df.shape)
 
-            results = df.to_dict('records')
-            columns = [{'field': col, 'headerName': col} for col in df.columns]
-            results_cache["latest"] = [results, columns]
             prev_time = time.time()
+            
+            
             df.to_csv("Data/Results/"+result_name+"/"+f"{result_name}.csv", index=False)
-            print("Time taken to save csv:", time.time() - prev_time)
+            print("Time taken to save csv:", round(time.time() - prev_time, 2))
+
+
+        if action == "excel":
+            print("Action: Download excel")
 
             prev_time = time.time()
             csvfile = f"Data/Results/{result_name}/{result_name}.csv"
-            print("Time taken to read csv:", time.time() - prev_time)
+            print("Time taken to read csv:", round(time.time() - prev_time, 2))
             
             prev_time = time.time()
             workbook = xlsxWorkbook(f"Data/Results/{result_name}/{result_name}.xlsx")
@@ -366,55 +391,50 @@ def search(request):
                 reader = csv.reader(f)
                 for r, row in enumerate(reader):
                     for c, col in enumerate(row):
-                        worksheet.write(r, c, col)
+                        try:
+                            worksheet.write(r, c, float(col))
+                        except:
+                            worksheet.write(r, c, col)
             worksheet.autofit()
             worksheet.autofilter('A1:BP1')
             worksheet.freeze_panes(1, 0)
             workbook.close()
-            print("Time taken to save xlsx:", time.time() - prev_time)
+            print("Time taken to save xlsx:", round(time.time() - prev_time, 2))
 
-            ######################################################
-            # with open(csvfile, 'rt', encoding='utf8') as f:
-            #     reader = csv.reader(f)
-            #     data = list(reader) 
-            # print("Time taken to read csv:", time.time() - prev_time)
+            print("Total Time taken : ", round(time.time() - start_time, 2))
 
-            # prev_time = time.time()
-            # wb = Workbook()
-            # ws = wb.new_sheet("Sheet1", data=data)
+            with open("Data/Results/"+result_name+"/"+f"{result_name}.xlsx", "rb") as f:
+                response = HttpResponse(f.read(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+                response['Content-Disposition'] = f'attachment; filename="{result_name}.xlsx"'
+                return response
+            
+        elif action == "results":
+            df = pd.read_csv(f"Data/Results/{result_name}/{result_name}.csv", dtype = create_table.dtypes, converters=create_table.converters)
+            df = df.replace({np.nan: None})
 
-            # column_widths = [max(len(str(cell)) for cell in col) for col in zip(*data)]
-            # for col_idx, width in enumerate(column_widths, start=1):
-            #     ws.set_col_style(col_idx, Style(alignment=Alignment(horizontal="left")))  # Align text
-            #     ws.set_col_style(col_idx, Style(size=max(10, min(width + 2, 50))))  # Set width limit            
+            row_data = df.to_dict('records')
+            column_defs = [{'field' : col} for col in df.columns]
+            results_cache["latest"] = [row_data, column_defs]
 
-            # ws.auto_filter = "A1:BP1"
-            # ws.panes = Panes(1, 0)
+            print("Total Time taken : ", round(time.time() - start_time, 2))
 
-            # wb.save(f"Data/Results/{result_name}/{result_name}.xlsx")
-            # print("Time taken to save xlsx:", time.time() - prev_time)
-            ######################################################
+            return redirect('results')
 
-        print("Total Time taken : ",time.time() - start_time)
-        
-        # return redirect('results')
-        # return render(request, "SearchApp/Results.html", {"results": results})
-        with open("Data/Results/"+result_name+"/"+f"{result_name}.xlsx", "rb") as f:
-            response = HttpResponse(f.read(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-            response['Content-Disposition'] = f'attachment; filename="{result_name}.xlsx"'
-            return response
-    
-    
-    
     #send context of last month date
     context = {"current_date" : current_date}
     return render(request, 'SearchApp/Search-page.html', context)
 
 def results(request):
-    data = results_cache["latest"][0]
-    columns = results_cache["latest"][1]
-    print("Results: ", results)
-    return render(request, 'SearchApp/Results.html', {'row_data': data, 'column_defs': columns})
+    row_data = results_cache["latest"][0]
+    column_defs = results_cache["latest"][1]
+    # df = pd.DataFrame({
+    # 'Name': ['Alice', 'Bob', 'Charlie'],
+    # 'Age': [25, 30, 35]
+    # })
+
+    # row_data = df.to_dict('records')
+    # column_defs = [{'field': col} for col in df.columns]
+    return render(request, 'SearchApp/Results.html', {'row_data': row_data, 'column_defs': column_defs})
 
 def loading(request, task_id):
     # task = ProcessingTask.objects.get(id=task_id)

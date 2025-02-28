@@ -31,11 +31,11 @@
 
   </head>
 <body>
-    <div class="background" style="--box-height: 570px; --box-width: 600px;">
+    <div class="background" style="--box-height: 400px; --box-width: 600px;">
         <div class="shape shape2"></div>
         <div class="shape shape2"></div>
     </div>
-    <form id="uploadForm" class="form2" style="--box-height: 570px; --box-width: 600px;" method="POST"  enctype="multipart/form-data">
+    <form id="uploadForm" class="form2" style="--box-height: 400px; --box-width: 600px;" method="POST"  enctype="multipart/form-data">
         {% csrf_token %}
         <h3>Upload zip file</h3>
         <div id="dropArea" class="upload-box" onclick="document.getElementById('fileInput').click()">
@@ -44,8 +44,8 @@
         </div>
 
          <!-- New Month Input -->
-        <label for="Month">Select Month</label>
-        <input id="Month" type="month" style="margin-top: 10px; text-align: center;" name="Month" value="{{ month }}"/>
+        <!-- <label for="Month">Select Month</label>
+        <input id="Month" type="month" style="margin-top: 10px; text-align: center;" name="Month" value="{{ month }}"/> -->
         
         <ul id="fileList"></ul>
         <button type="submit">Submit</button>

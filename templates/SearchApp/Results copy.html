@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AG-Grid Demo</title>
+    <!-- Correct AG-Grid Community CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/ag-grid/dist/styles/ag-grid.css">
+    <link rel="stylesheet" href="https://unpkg.com/ag-grid/dist/styles/ag-theme-balham.css">
+</head>
+<body>
+    <div id="myGrid" style="height: 500px; width:100%;" class="ag-theme-balham"></div>
+
+    {{ row_data|json_script:"rowData" }}
+    {{ column_defs|json_script:"columnDefs" }}
+
+    <!-- Correct AG-Grid Community JS -->
+    <script src="https://unpkg.com/ag-grid/dist/ag-grid.min.noStyle.js"></script>
+    <script>
+        // Parse data from Django template
+        const rowData = JSON.parse(document.getElementById('rowData').textContent);
+        let columnDefs = JSON.parse(document.getElementById('columnDefs').textContent);
+
+        // Configure columns with default formatting
+        columnDefs = columnDefs.map(col => ({
+            ...col,
+            valueFormatter: params => params.value ?? 'N/A'
+        }));
+
+        // Configure grid options
+        const gridOptions = {
+            columnDefs: columnDefs,
+            rowData: rowData,
+            defaultColDef: {
+                sortable: true,
+                filter: true,
+                resizable: true,
+                flex: 1
+            }
+        };
+
+        // Initialize grid directly (no need for DOMContentLoaded)
+        document.addEventListener('DOMContentLoaded', () => {
+            new agGrid.Grid(document.querySelector('#myGrid'), gridOptions);
+        });
+    </script>
+</body>
+</html>

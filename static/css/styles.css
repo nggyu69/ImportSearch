@@ -166,8 +166,8 @@ form{
 }
 
 .bg-box{
-  height: 680px;
-  width: 1300px;
+  height: var(--box-height);
+  width: var(--box-width);
   background-color: rgba(255,255,255,0.13);
   position: absolute;
   transform: translate(-50%,-50%);
@@ -274,3 +274,35 @@ h2{
 #fileList li {
     list-style: none;
 }
+
+/* AG Grid text color override */
+.ag-root-wrapper {
+    color: white !important;
+}
+
+.ag-cell {
+    color: white !important;
+    background-color: rgba(255, 255, 255, 0.132);
+}
+
+/* Optional: header text color */
+.ag-header-cell-label {
+    color: white !important;
+}
+
+/* Background color for grid */
+/* .ag-root-wrapper {
+    background: rgba(255,255,255,0.13);
+} */
+
+.ag-header {
+    background: rgba(0, 0, 0, 0.3) !important;
+}
+
+/* .ag-row-even {
+    background: rgba(255,255,255,0.05);
+}
+
+.ag-row-odd {
+    background: rgba(255,255,255,0.02);
+} */

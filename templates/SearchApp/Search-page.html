@@ -56,8 +56,15 @@
           <label class="Date" for="Date"></label>
           <input placeholder='To Date' class="textbox-n" type="text" onfocus="(this.type='date')" id="date" name="to_date" value={{ current_date }} min="2018-01-01" max={{ current_date }}>
 
-          <button class="buttonsearch" type="submit" name="action" value="search">Results</button>
-      </form>
+          <div class="d-flex" style="gap: 10px;">
+            <!-- <button class="buttonsearch" type="submit" name="action" value="results">
+              Results
+            </button> -->
+            <button class="buttonsearch" type="submit" name="action" value="excel">
+              Excel
+            </button>
+          </div>
+        </form>
     
       <button type="button" onclick="hrefFunction()">Search BOM</button>
       
