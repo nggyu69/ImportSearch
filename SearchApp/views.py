@@ -10,7 +10,6 @@ import sqlite3
 import time
 from multiprocessing import Process, Manager
 from xlsxwriter.workbook import Workbook as xlsxWorkbook
-from pyexcelerate import Workbook, Style, Alignment, Panes
 import csv
 import os
 import shutil

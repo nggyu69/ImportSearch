@@ -1,2 +1,7 @@
 Data/
 .vercel
+__pycache__/
+ImportSearch/__pycache__ /
+Scripts/__pycache__
+SearchApp/__pycache__
+SearchApp/migrations/__pycache__
