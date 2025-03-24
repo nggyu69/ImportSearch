@@ -297,6 +297,14 @@ def search_bom(request):
         
     return render(request, 'SearchApp/Search_BOM.html')
 
+def escape_fts5(text):
+    # List of FTS5 special characters that need escaping
+    special_chars = ['"', '*', '.', '(', ')', '-', '+']
+    escaped_text = text
+    for char in special_chars:
+        escaped_text = escaped_text.replace(char, f'"{char}"')
+    return escaped_text
+
 def search(request):
     start_time = time.time()
 
@@ -312,6 +320,9 @@ def search(request):
         importer = request.POST.get('IN').upper()
         product = request.POST.get('PD').upper()
 
+        supplier = escape_fts5(supplier)
+        importer = escape_fts5(importer)
+        product = escape_fts5(product)
         
         df = pd.DataFrame()
         query_type = ""
