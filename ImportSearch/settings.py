@@ -36,7 +36,8 @@ ALLOWED_HOSTS = ["172.19.7.20",
                  "100.69.92.17",
                  ".vercel.app",
                  "django.chiragreddy.com",
-                 "chiragreddy.com"]
+                 "chiragreddy.com",
+                 "www.chiragreddy.com"]
 
 CSRF_TRUSTED_ORIGINS = ["https://safe-previously-ibex.ngrok-free.app",
                         "https://chiragreddy.com"]

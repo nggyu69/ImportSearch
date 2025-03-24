@@ -9,106 +9,15 @@
     --box-height: 700px;
     --box-width: 900px;
 }
+  
 body{
-    background-color: #080710;
+    width: 100vw;
+    height: 100vh;
+    /* background-color: #002244; */
+    /* background: linear-gradient(90deg, rgba(89, 0, 255, 0.5) 0%, rgba(0, 145, 255, 0.5) 99%); */
+    background: linear-gradient(90deg, rgb(6, 32, 82) 10%, rgb(35, 69, 129) 90%);
 }
 
-.background{
-    height: var(--box-height);
-    width: var(--box-width);
-    position: absolute;
-    transform: translate(-50%,-50%);
-    left: 50%;
-    top: 50%;
-    background: transparent;
-}
-.background .shape{
-    height: 200px;
-    width: 200px;
-    position: absolute;
-    border-radius: 50%;
-}
-.shape:first-child{
-    background: linear-gradient(
-        #00eeff,
-        #0004ff
-    );
-    left: -80px;
-    top: -80px;
-}
-.shape:last-child{
-    background: linear-gradient(
-        to right,
-        #ff512f,
-        #f09819
-    );
-    right: -80px;
-    bottom: -80px;
-}
-
-.shape2:first-child{
-    height: 100px;
-    width: 100px;
-    left: -50px;
-    top: -50px;
-}
-.shape2:last-child{
-    height: 100px;
-    width: 100px;
-    right: -50px;
-    bottom: -50px;
-}
-.shape3:first-child{
-    height: 70px;
-    width: 70px;
-    /* left: -465px;
-    top: -105px; */
-}
-
-.shape3:last-child{
-    height: 70px;
-    width: 70px;
-    /* right: -465px;
-    bottom: -105px; */
-}
-
-.transparent-box {
-    height: var(--box-height);
-    width: var(--box-width);
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%,-50%);
-    border-radius: 10px;
-    backdrop-filter: blur(10px);
-    background-color: rgba(255,255,255,0.13);
-    border: 2px solid rgba(255,255,255,0.1);
-    box-shadow: 0 0 40px rgba(8,7,16,0.6);
-    padding: 30px 20px;
-}
-.logout{
-    text-align: right;
-    font-size: 16px;
-    text-decoration: none;
-}
-
-.logout:hover{
-  color: gray;
-}
-
-.fas{
-    color: #ffffff;
-}
-
-.logout-logo{
-  height: 20px;
-  width: 20px;
-  color: white;
-}
-/*
-::-webkit-calendar-picker-indicator {
-    filter: invert(1);
-} */
 
 .outer-wrapper{
   width: 1100px;
@@ -151,44 +60,28 @@ th, td{
 }
 
 form{
-    height: 520px;
-    width: 400px;
-    background-color: rgba(255,255,255,0.13);
+    background-color: rgba(0, 0, 0, 0.2);
     position: absolute;
     transform: translate(-50%,-50%);
     top: 50%;
     left: 50%;
-    border-radius: 10px;
+    border-radius: 50px;
     backdrop-filter: blur(10px);
     border: 2px solid rgba(255,255,255,0.1);
     box-shadow: 0 0 40px rgba(8,7,16,0.6);
     padding: 50px 35px;
 }
 
-.bg-box{
-  height: var(--box-height);
-  width: var(--box-width);
-  background-color: rgba(255,255,255,0.13);
-  position: absolute;
-  transform: translate(-50%,-50%);
-  top: 50%;
-  left: 50%;
-  border-radius: 5px;
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(255,255,255,0.1);
-  box-shadow: 0 0 40px rgba(8,7,16,0.6);
-  padding: 50px 35px;
-}
 
 .form2{
-    height: var(--box-height);
-    width: var(--box-width);
+    height: 70vh;
+    width: 30vw;
     padding-top: 30px;
 }
 
 form *{
     font-family: 'Poppins',sans-serif;
-    color: #ffffff;
+    color: #e5e5e5;
     letter-spacing: 0.5px;
     outline: none;
     border: none;
@@ -201,12 +94,29 @@ form h3{
 }
 
 form h4{
+    color: #ffffff;
     font-size: 22px;
     font-weight: 500;
     line-height: 32px;
     text-align: center;
 
 }
+
+.bg-box{
+    height: var(--box-height);
+    width: var(--box-width);
+    background-color: transparent;
+    position: absolute;
+    transform: translate(-50%,-50%);
+    top: 50%;
+    left: 50%;
+    border-radius: 0px;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,255,255,0.1);
+    box-shadow: 0 0 40px rgba(8,7,16,0.6);
+    padding: 50px 35px;
+  }
+
 
 label{
     display: block;
@@ -218,12 +128,12 @@ input{
     display: block;
     height: 50px;
     width: 100%;
-    background-color: rgba(255,255,255,0.07);
-    border-radius: 3px;
-    padding: 0 10px;
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 100px;
+    padding: 10px;
     margin-top: 8px;
     font-size: 14px;
-    font-weight: 300;
+    font-weight: 400;
 }
 ::placeholder{
     color: #e5e5e5;
@@ -232,12 +142,12 @@ button{
     margin-top: 30px;
     height: 60px;
     width: 100%;
-    background-color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.7);
     color: #080710;
-    padding: 15px 0;
+    padding: 15px;
     font-size: 18px;
     font-weight: 600;
-    border-radius: 5px;
+    border-radius: 100px;
     cursor: pointer;
 }
 
@@ -306,3 +216,70 @@ h2{
 .ag-row-odd {
     background: rgba(255,255,255,0.02);
 } */
+
+/* --- AWaves Background Animation Styles --- */
+a-waves {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2; /* Ensure the waves sit behind your other elements */
+  overflow: hidden;
+}
+
+a-waves:before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: #160000;
+  border-radius: 50%;
+  transform: translate3d(calc(var(--x) - 50%), calc(var(--y) - 50%), 0);
+  will-change: transform;
+  content: "";
+}
+
+a-waves svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+a-waves svg path {
+  fill: none;
+  stroke: #160000;
+  stroke-width: 1px;
+}
+
+.loading-cursor {
+    cursor: wait !important;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.loading-spinner {
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid #3498db;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

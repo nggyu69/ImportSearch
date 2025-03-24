@@ -31,15 +31,15 @@
 
   </head>
 <body>
-    <div class="background" style="--box-height: 400px; --box-width: 600px;">
-        <div class="shape shape2"></div>
-        <div class="shape shape2"></div>
-    </div>
-    <form id="uploadForm" class="form2" style="--box-height: 400px; --box-width: 600px;" method="POST"  enctype="multipart/form-data">
+    <a-waves>
+        <svg class="js-svg"></svg>
+    </a-waves>
+    <div class="bg-box" style="--box-height: 100%; --box-width: 100%;">
+    <form id="uploadForm" class="form2" style="--box-height: 40%; --box-width: 20%;" method="POST"  enctype="multipart/form-data">
         {% csrf_token %}
         <h3>Upload zip file</h3>
         <div id="dropArea" class="upload-box" onclick="document.getElementById('fileInput').click()">
-            <p>Drag & Drop file here or click to upload</p>
+            <p>Click to upload</p>
             <input type="file" id="fileInput" name="file" accept=".zip,.rar,.7z,.tar,.gz" style="display: none;">
         </div>
 
@@ -82,6 +82,9 @@
         });
 
     </script>
-    
+    <!-- Include Noise library and AWaves custom element script -->
+    <script src="{% static 'js/noise.js' %}"></script>
+    <script src="{% static 'js/awaves.js' %}"></script>
+    </div>
 </body>
 </html>
