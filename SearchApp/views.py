@@ -131,6 +131,17 @@ def create_batch(start_date, end_date, supplier, importer, product):
 def home(request):
     return render(request, 'SearchApp/Home.html')
 
+def display_months(request):
+    data = conn_main.execute("select stored_months, rows from master").fetchall()
+    data_dict = {row[0]: row[1] for row in data}
+    
+    # Sort by key (year_month)
+    sorted_data = dict(sorted(data_dict.items()))
+    
+    return render(request, 'SearchApp/Display_Months.html', {
+        'data': sorted_data
+    })    
+
 def insert(request):
     # import create_table
     from .models import ProcessingTask
