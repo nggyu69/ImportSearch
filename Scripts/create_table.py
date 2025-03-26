@@ -320,9 +320,9 @@ def check_new_file(task_id):
     print("Total files : ", total_files)
     
     processed_files = 0
-    count = 0
     for i in cur_dict:
         for j in cur_dict[i]:
+            count = 0
             t = 1
             files = os.listdir(f"Data/Excel_Files/{i}/{i}-{j}")
             files.sort()
@@ -368,7 +368,7 @@ def check_new_file(task_id):
                     # df = pd.read_excel(f"Data/Excel_Files/{i}/{i}-{j}/{k}", names = cols.split(", "), dtype=dtypes, converters=converters, engine="openpyxl")
                     print("Read standard format file")
                     print("File shape : ", df.shape)
-                    count += df.shape[0]
+                    
                     df.to_csv(f"Data/Excel_Files/{i}/{i}-{j}/{k[:-5]}.csv", index=False, header=True)
                     print("Converted to csv")
                     # os.remove(f"Data/Excel_Files/{i}/{i}-{j}/{k}")
@@ -376,6 +376,7 @@ def check_new_file(task_id):
                     k = k[:-5]+".csv"
                 
                 for chunk in pd.read_csv(f"Data/Excel_Files/{i}/{i}-{j}/{k}",dtype=dtypes,converters=converters, chunksize=50000):
+                    count += chunk.shape[0]
                     chunk.rename(columns={"TOTAL_INSU_VALUE_ FORGN_CUR":"TOTAL_INSU_VALUE_FORGN_CUR"}, inplace=True)
                     for x in chunk.columns:
                         if x not in dtypes and x not in converters:
