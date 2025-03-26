@@ -320,6 +320,7 @@ def check_new_file(task_id):
     print("Total files : ", total_files)
     
     processed_files = 0
+    count = 0
     for i in cur_dict:
         for j in cur_dict[i]:
             t = 1
@@ -367,7 +368,7 @@ def check_new_file(task_id):
                     # df = pd.read_excel(f"Data/Excel_Files/{i}/{i}-{j}/{k}", names = cols.split(", "), dtype=dtypes, converters=converters, engine="openpyxl")
                     print("Read standard format file")
                     print("File shape : ", df.shape)
-                    
+                    count += df.shape[0]
                     df.to_csv(f"Data/Excel_Files/{i}/{i}-{j}/{k[:-5]}.csv", index=False, header=True)
                     print("Converted to csv")
                     # os.remove(f"Data/Excel_Files/{i}/{i}-{j}/{k}")
@@ -392,7 +393,7 @@ def check_new_file(task_id):
 
             sl_no += 1
             print("Writing to master table : ", sl_no, i+"_"+j)
-            cur.execute("INSERT INTO master VALUES (?,?)", (sl_no, i+"_"+j))
+            cur.execute("INSERT INTO master VALUES (?,?,?)", (sl_no, i+"_"+j, count))
         
         conn.commit()
 
