@@ -35,11 +35,14 @@ ALLOWED_HOSTS = ["172.19.7.20",
                  "100.95.173.50",
                  "100.69.92.17",
                  ".vercel.app",
-                 "django.chiragreddy.com",
-                 "chiragreddy.com"]
+                 "importsearch.chiragreddy.com",
+                 "chiragreddy.com",
+		         "sudheer",
+                 "drives",
+                 "172.19.6.33"]
 
 CSRF_TRUSTED_ORIGINS = ["https://safe-previously-ibex.ngrok-free.app",
-                        "https://chiragreddy.com"]
+                        "https://importsearch.chiragreddy.com"]
 # Application definition
 
 INSTALLED_APPS = [

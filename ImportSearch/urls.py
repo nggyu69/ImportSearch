@@ -27,4 +27,5 @@ urlpatterns = [
     path('search_bom/', views.search_bom, name="search_bom"),
     path('loading/<int:task_id>/', views.loading, name='loading'),
     path('progress_status/<int:task_id>/', views.progress_status, name='progress_status'),
+    path('display-months/', views.display_months, name='display_months'),
 ]
