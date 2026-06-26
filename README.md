@@ -2,6 +2,8 @@
 
 > A Django web app for searching and analyzing Indian import / customs (Bill of Entry) trade data — fast full‑text search across millions of shipment records, with one‑click Excel export and bulk BOM pricing lookups.
 
+> 🚀 **Looking for the modern UI?** Check out [**importsearch_next**](https://github.com/nggyu69/importsearch_next) — a Next.js rewrite of this project with a refreshed, modern interface.
+
 ---
 
 ## ✨ Features
