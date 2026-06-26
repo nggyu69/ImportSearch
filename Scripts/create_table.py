@@ -322,6 +322,7 @@ def check_new_file(task_id):
     processed_files = 0
     for i in cur_dict:
         for j in cur_dict[i]:
+            count = 0
             t = 1
             files = os.listdir(f"Data/Excel_Files/{i}/{i}-{j}")
             files.sort()
@@ -375,6 +376,7 @@ def check_new_file(task_id):
                     k = k[:-5]+".csv"
                 
                 for chunk in pd.read_csv(f"Data/Excel_Files/{i}/{i}-{j}/{k}",dtype=dtypes,converters=converters, chunksize=50000):
+                    count += chunk.shape[0]
                     chunk.rename(columns={"TOTAL_INSU_VALUE_ FORGN_CUR":"TOTAL_INSU_VALUE_FORGN_CUR"}, inplace=True)
                     for x in chunk.columns:
                         if x not in dtypes and x not in converters:
@@ -392,7 +394,7 @@ def check_new_file(task_id):
 
             sl_no += 1
             print("Writing to master table : ", sl_no, i+"_"+j)
-            cur.execute("INSERT INTO master VALUES (?,?)", (sl_no, i+"_"+j))
+            cur.execute("INSERT INTO master VALUES (?,?,?)", (sl_no, i+"_"+j, count))
         
         conn.commit()
 

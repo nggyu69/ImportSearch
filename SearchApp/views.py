@@ -131,6 +131,17 @@ def create_batch(start_date, end_date, supplier, importer, product):
 def home(request):
     return render(request, 'SearchApp/Home.html')
 
+def display_months(request):
+    data = conn_main.execute("select stored_months, rows from master").fetchall()
+    data_dict = {row[0]: row[1] for row in data}
+    
+    # Sort by key (year_month)
+    sorted_data = dict(sorted(data_dict.items()))
+    
+    return render(request, 'SearchApp/Display_Months.html', {
+        'data': sorted_data
+    })    
+
 def insert(request):
     # import create_table
     from .models import ProcessingTask
@@ -286,6 +297,14 @@ def search_bom(request):
         
     return render(request, 'SearchApp/Search_BOM.html')
 
+def escape_fts5(text):
+    # List of FTS5 special characters that need escaping
+    special_chars = ['"', '*', '.', '(', ')', '-', '+']
+    escaped_text = text
+    for char in special_chars:
+        escaped_text = escaped_text.replace(char, f'"{char}"')
+    return escaped_text
+
 def search(request):
     start_time = time.time()
 
@@ -301,6 +320,9 @@ def search(request):
         importer = request.POST.get('IN').upper()
         product = request.POST.get('PD').upper()
 
+        supplier = escape_fts5(supplier)
+        importer = escape_fts5(importer)
+        product = escape_fts5(product)
         
         df = pd.DataFrame()
         query_type = ""
